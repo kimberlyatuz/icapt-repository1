@@ -1,0 +1,318 @@
+{% load static %}
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>ICAPT | Smarter Patient Data Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/icofont/icofont@1.0.2/css/icofont.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            800: '#1e3a8a',
+                            900: '#0f2a5a',
+                        },
+                        olive: '#6b8e23',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet"/>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8fafc;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, rgba(30,58,138,0.9) 0%, rgba(59,130,246,0.9) 100%);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        .feature-icon {
+            background: linear-gradient(135deg, rgba(30,58,138,0.1) 0%, rgba(59,130,246,0.1) 100%);
+        }
+        .nav-link {
+            position: relative;
+        }
+        .nav-link:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: white;
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover:after {
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header with Glass Effect -->
+    <header class="hero-gradient text-white sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="text-2xl font-bold font-['Poppins']">ICAPT</div>
+                <nav class="hidden md:flex space-x-8 items-center">
+                    <a class="nav-link hover:text-blue-200" href="#">Home</a>
+                    <a class="nav-link hover:text-blue-200" href="#">Features</a>
+                    <a class="nav-link hover:text-blue-200" href="#">About</a>
+                    <a class="glass-card px-6 py-2 rounded-full font-medium hover:bg-white/20 transition-all"
+                       href="{% url 'register' %}">Get Started</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <main class="container mx-auto px-4 py-12 mt-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <!-- Left Column -->
+            <div>
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-900 leading-tight font-['Poppins']">
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-navy-800 to-blue-600">Transform</span> Patient Care Coordination
+                </h1>
+
+                <p class="text-lg text-gray-600 mt-6 max-w-lg">
+                    ICAPT's intelligent platform reduces documentation time by 40% while improving care team collaboration and patient outcomes.
+                </p>
+                <p>
+                <i>Workflows so smooth, your team will wonder how they ever worked without it!</i>
+                </p>
+
+                <div class="mt-8 flex flex-wrap gap-4">
+                    <a href="{% url 'register' %}"
+                       class="btn-primary text-white px-8 py-3 rounded-full font-semibold inline-flex items-center">
+                        Create Account <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                    <a href="#"
+                       class="glass-card border border-blue-200 text-blue-800 px-6 py-3 rounded-full font-medium inline-flex items-center">
+                        <i class="fas fa-play-circle mr-2"></i> Demo Video
+                    </a>
+                </div>
+
+                <div class="mt-12 glass-card p-4 rounded-xl inline-block">
+
+                </div>
+            </div>
+
+            <!-- Right Column - Login Form with Glass Effect -->
+            <div class="relative">
+                <div class="glass-card p-8 max-w-md mx-auto lg:mx-0 lg:ml-auto rounded-2xl border border-white/20">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-navy-800 rounded-2xl opacity-20 blur-sm"></div>
+                    <div class="relative">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6">Sign In to ICAPT</h3>
+                        <form method="POST" action="">
+                            {% csrf_token %}
+                            <div class="mb-4">
+                                <label class="block text-gray-700 mb-2 font-medium" for="username">Username</label>
+                                <input class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 glass-card"
+                                       id="username" name="username" type="text" placeholder="Username..."/>
+                            </div>
+                            <div class="mb-6">
+                                <label class="block text-gray-700 mb-2 font-medium" for="password">Password</label>
+                                <input class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 glass-card"
+                                       id="password" name="password" type="password" placeholder="••••••••"/>
+                            </div>
+                            <div class="flex items-center justify-between mb-6">
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600 rounded"/>
+                                    <span class="ml-2 text-gray-700">Remember me</span>
+                                </label>
+                                <a href="{% url 'forgot_password' %}" class="text-blue-600 hover:underline text-sm">Forgot password?</a>
+                            </div>
+                            <button class="w-full btn-primary text-white py-3 px-4 rounded-lg font-medium">
+                                Login <i class="fas fa-sign-in-alt ml-2"></i>
+                            </button>
+                        </form>
+                        <div class="mt-6 text-center">
+                            <p class="text-gray-600">Don't have an account? <a href="{% url 'register' %}" class="text-blue-600 font-medium hover:underline">Sign up</a></p>
+                        </div>
+                        {% for message in messages %}
+                        <div class="mt-4 p-3 bg-red-100 text-red-700 rounded text-sm">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Features Section -->
+    <section class="py-16 bg-gradient-to-b from-white to-blue-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4 font-['Poppins']">Why ICAPT Stands Out</h2>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+                    Designed specifically for healthcare teams who demand less manual data processes and simplicity
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="glass-card p-8 rounded-2xl hover:shadow-lg transition-all">
+                    <div class="feature-icon w-12 h-12 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-bolt text-blue-800 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Streamlined Workflows</h3>
+                    <p class="text-gray-600">
+                        Intuitive interface reduces data entry time by 40% compared to traditional systems.
+                    </p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="glass-card p-8 rounded-2xl hover:shadow-lg transition-all">
+                    <div class="feature-icon w-12 h-12 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-shield-alt text-olive text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">HIPAA-Compliant</h3>
+                    <p class="text-gray-600">
+                        End-to-end encryption and audit trails meet strict healthcare compliance requirements.
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="glass-card p-8 rounded-2xl hover:shadow-lg transition-all">
+                    <div class="feature-icon w-12 h-12 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-chart-network text-purple-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Care Coordination</h3>
+                    <p class="text-gray-600">
+                        Update records from any device and anywhere -field, clinic, hospital wards or home visits and keep all team members aligned instantly.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Us Section -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col lg:flex-row gap-12 items-center">
+                <div class="lg:w-1/2">
+                    <img src="{% static 'ICAPT.png' %}" alt="Healthcare team using ICAPT" class="rounded-2xl shadow-xl w-full">
+                </div>
+                <div class="lg:w-1/2">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6 font-['Poppins']">About ICAPT</h2>
+                    <p class="text-lg text-gray-600 mb-6">
+                        Our system enhances communication between caregivers and families, fostering a collaborative approach to patient care.
+                    </p>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mt-1">
+                                <div class="glass-card w-6 h-6 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-check text-blue-800 text-xs"></i>
+                                </div>
+                            </div>
+                            <p class="ml-3 text-gray-700">Advanced analytics to identify trends and improve outcomes</p>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mt-1">
+                                <div class="glass-card w-6 h-6 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-check text-blue-800 text-xs"></i>
+                                </div>
+                            </div>
+                            <p class="ml-3 text-gray-700">Customizable dashboards with multiple visualization types</p>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mt-1">
+                                <div class="glass-card w-6 h-6 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-check text-blue-800 text-xs"></i>
+                                </div>
+                            </div>
+                            <p class="ml-3 text-gray-700">Automated report generation for data-driven decisions</p>
+                        </div>
+                    </div>
+                    <a href="#" class="inline-block mt-8 text-blue-600 font-medium hover:underline">
+                        Learn more about our features <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-16 bg-gradient-to-r from-navy-800 to-navy-900 text-white">
+        <div class="container mx-auto px-4 text-center">
+            <div class="glass-card p-8 rounded-2xl max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold mb-6 font-['Poppins']">Ready to Experience the ICAPT Difference?</h2>
+                <p class="text-xl mb-8 max-w-2xl mx-auto">
+                    Join healthcare providers who are transforming patient data management.
+                </p>
+                <div class="flex flex-wrap justify-center gap-4">
+
+                    <a href="#"
+                       class="glass-card border border-white/20 px-8 py-4 rounded-full font-medium inline-flex items-center hover:bg-white/10">
+                        <i class="fas fa-calendar-alt mr-2"></i> Book Demo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 font-['Poppins']">ICAPT</h3>
+                    <p class="text-gray-400">
+                        Intelligent Care Coordination Platform
+                    </p>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Product</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Features</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Pricing</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Security</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Resources</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Documentation</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">API</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Support</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Company</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">About</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
+                <p>© 2025 ICAPT. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

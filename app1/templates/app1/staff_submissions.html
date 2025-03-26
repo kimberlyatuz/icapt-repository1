@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Dashboard</h1>
+<p>Hello {{ user_profile.name }},</p>
+<p>You have:</p>
+<ul>
+    <li>Total Submissions: {{ total_submissions }}</li>
+    <li>Accepted Submissions: <a href="{% url 'user_submissions' request.user.id %}?status=accepted">{{ accepted_submissions }}</a></li>
+    <li>Rejected Submissions: <a href="{% url 'user_submissions' request.user.id %}?status=rejected">{{ rejected_submissions }}</a></li>
+</ul>
+
+<h3>Submissions Progress</h3>
+<div>
+    <button onclick="showProgress('daily')">Daily</button>
+    <button onclick="showProgress('monthly')">Monthly</button>
+    <button onclick="showProgress('yearly')">Yearly</button>
+</div>
+
+<div id="progress-chart">
+    <!-- Chart or progress data will be displayed here -->
+</div>
+
+<script>
+function showProgress(period) {
+    // Fetch and display progress data based on the selected period
+    fetch(`/progress-data/${period}/`)
+        .then(response => response.json())
+        .then(data => {
+            // Update the #progress-chart with the fetched data
+            document.getElementById('progress-chart').innerHTML = JSON.stringify(data); // Update this to render a chart
+        })
+        .catch(error => {
+            console.error('Error fetching progress data:', error);
+        });
+}
+</script>
+
+{% include 'partials/_footer.html' %}
+{% endblock %}

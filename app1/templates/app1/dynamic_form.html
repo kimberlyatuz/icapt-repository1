@@ -1,0 +1,42 @@
+{% load static%}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ user_form.title }}</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>{{ user_form.title }}</h1>
+        <form method="post" action="{% url 'dynamic_form_view' user_form.id %}">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    <label>{{ field.label }}</label>
+                    {{ field }}  <!-- This will render the appropriate input based on the field type -->
+                    {% if field.field_type == 'checkbox' %}
+                        <input type="checkbox" class="form-control" name="{{ field.label }}">
+                    {% elif field.field_type == 'radio' %}
+                        {% for option in field.get_options %}
+                            <div>
+                                <input type="radio" name="{{ field.label }}" value="{{ option }}"> {{ option }}
+                            </div>
+                        {% endfor %}
+                    {% elif field.field_type == 'select' %}
+                        <select class="form-control" name="{{ field.label }}">
+                            {% for option in field.get_options %}
+                                <option value="{{ option }}">{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                    {% elif field.field_type == 'date' %}
+                        <input type="date" class="form-control" name="{{ field.label }}">
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-success mt-3">Submit</button>
+        </form>
+    </div>
+</body>
+</html>

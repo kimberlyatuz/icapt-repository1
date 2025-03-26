@@ -1,0 +1,216 @@
+{% load custom_filters %}
+{% include 'partials/navbar.html' %}
+<h2 class="mt-4">Form Submissions</h2>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+<!-- Tabs Navigation -->
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link active" aria-current="page" href="#">View</a>
+    </li>
+    <li class="nav nav-tabs nav-item">
+        <a class="nav-link" href="{% url 'import_data' %}">Import</a>
+    </li>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="exportDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Export
+        </a>
+        <ul class="dropdown-menu p-3">
+            <form id="export-form" method="POST" action="{% url 'export_data' %}" onsubmit="return prepareExport();">
+                {% csrf_token %}
+                <input type="hidden" name="form_id" value="{{ submissions.0.user_form_id }}">
+                <select name="file-format" class="form-select mb-2" required>
+                    <option value="">Select File Format</option>
+                    <option value="CSV">CSV</option>
+                    <option value="JSON">JSON</option>
+                    <option value="XLS (Excel)">XLS (Excel)</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Export Selected</button>
+            </form>
+        </ul>
+    </li>
+</ul>
+
+<div class="container mt-4">
+    <form method="POST" class="mb-3">
+        {% csrf_token %}
+        <select name="form_id" class="form-select" onchange="this.form.submit();">
+            <option value="">Select Form</option>
+            {% for form in forms %}
+                <option value="{{ form.id }}" {% if submissions and submissions.0.user_form_id == form.id %}selected{% endif %}>
+                    {{ form.title }}
+                </option>
+            {% endfor %}
+        </select>
+        <noscript>
+            <button type="submit" class="btn btn-primary mt-2">View Submissions</button>
+        </noscript>
+    </form>
+
+    {% if submissions %}
+    <form method="POST" id="bulk-action-form">
+        {% csrf_token %}
+        <select name="action" id="action-select">
+            <option value="">Select Action</option>
+            <option value="accept">Accept Selected</option>
+            <option value="reject">Reject Selected</option>
+        </select>
+        <button type="button" onclick="applyBulkAction()">Apply</button>
+
+        <table id="table_id" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>
+                        <input type="checkbox" id="select-all" onclick="toggleSelectAll(this)">
+                        <label for="select-all" style="margin-left: 5px;">Select all</label>
+                    </th>
+                    {% if request.user.is_superuser %}
+                        <th>Staff Name</th>
+                    {% endif %}
+                    {% for field_name in field_names %}
+                        <th>{{ field_name }}</th>
+                    {% endfor %}
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for submission in submissions %}
+                    <tr id="row-{{ submission.id }}">
+                        <td>
+                            <input type="checkbox" class="submission-checkbox" name="selected_items" value="{{ submission.id }}">
+                        </td>
+                        {% if request.user.is_superuser %}
+                            <td>{{ submission.user.username }}</td>
+                        {% endif %}
+                        {% for field_name in field_names %}
+                            <td class="editable" data-field="{{ field_name }}">{{ submission.get_data|get:field_name }}</td>
+                        {% endfor %}
+                        <td>{{ submission.status }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
+    {% else %}
+        <div class="alert alert-warning">No submissions found.</div>
+    {% endif %}
+</div>
+{% include 'partials/_footer.html' %}
+
+
+
+<script>
+function toggleSelectAll(selectAllCheckbox) {
+    const checkboxes = document.querySelectorAll('.submission-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
+}
+
+function applyBulkAction() {
+    const selectedSubmissions = document.querySelectorAll('.submission-checkbox:checked');
+    const action = document.getElementById('action-select').value;
+
+    if (selectedSubmissions.length === 0) {
+        alert('Please select at least one submission.');
+        return;
+    }
+
+    if (action === '') {
+        alert('Please select an action (Accept or Reject).');
+        return;
+    }
+
+    const submissionIds = Array.from(selectedSubmissions).map(checkbox => checkbox.value);
+
+    if (confirm(`Are you sure you want to ${action} the selected submissions?`)) {
+        fetch(`/bulk-${action}-submissions/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ submission_ids: submissionIds })
+        }).then(response => response.json())
+          .then(data => {
+              if (data.success) {
+                  submissionIds.forEach(id => {
+                      document.getElementById(`row-${id}`).remove();
+                  });
+                  alert(`Submissions ${action}ed successfully!`);
+              } else {
+                  alert(`Failed to ${action} submissions.`);
+              }
+          });
+    }
+}
+    function exportData(format) {
+    const selectedSubmissions = document.querySelectorAll('.submission-checkbox:checked');
+    const submissionIds = Array.from(selectedSubmissions).map(checkbox => checkbox.value);
+
+    if (submissionIds.length === 0) {
+        alert('Please select at least one submission to export.');
+        return;
+    }
+
+    // Here you would typically send the submissionIds to the server to handle the export
+    // For demonstration, we'll just log it and show an alert
+    alert(`Exporting ${submissionIds.length} submission(s) as ${format.toUpperCase()}`);
+
+    // Example of sending the data to the server (you would need to implement the server-side logic)
+    fetch(`/export-submissions/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ submission_ids: submissionIds, format: format })
+    }).then(response => response.json())
+      .then(data => {
+          if (data.success) {
+              alert(`Submissions exported successfully as ${format.toUpperCase()}!`);
+          } else {
+              alert(`Failed to export submissions.`);
+          }
+      });
+}
+function prepareExport() {
+    const formatSelect = document.querySelector('select[name="file-format"]');
+    if (formatSelect.value === "") {
+        alert('Please select a file format for export.');
+        return false;
+    }
+
+    const selectedSubmissions = document.querySelectorAll('.submission-checkbox:checked');
+    const submissionIds = Array.from(selectedSubmissions).map(checkbox => checkbox.value);
+
+    if (submissionIds.length === 0) {
+        alert('Please select at least one submission to export.');
+        return false;
+    }
+
+    const exportForm = document.getElementById('export-form');
+    submissionIds.forEach(id => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'selected_items';
+        input.value = id;
+        exportForm.appendChild(input);
+    });
+
+    return true;
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-..." crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<link href="https://cdn.datatables.net/v/dt/jq-3.7.0/jszip-3.10.1/dt-2.2.2/af-2.7.0/b-3.2.2/b-colvis-3.2.2/b-html5-3.2.2/b-print-3.2.2/cr-2.0.4/date-1.5.5/fc-5.0.4/kt-2.12.1/r-3.0.4/rg-1.5.1/rr-1.5.0/sc-2.4.3/sb-1.8.2/sp-2.3.3/sl-3.0.0/sr-1.4.1/datatables.min.css" rel="stylesheet" integrity="sha384-2xBJ27V0rw0MQ46axBBCEoVlg41sNeMeJL82VppT6b40SYYOufDUgh747pr6m3HC" crossorigin="anonymous">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js" integrity="sha384-VFQrHzqBh5qiJIU0uGU5CIW3+OWpdGGJM9LBnGbuIH2mkICcFZ7lPd/AAtI7SNf7" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js" integrity="sha384-/RlQG9uf0M2vcTw3CX7fbqgbj/h8wKxw7C3zu9/GxcBPRKOEcESxaxufwRXqzq6n" crossorigin="anonymous"></script>
+<script src="https://cdn.datatables.net/v/dt/jq-3.7.0/jszip-3.10.1/dt-2.2.2/af-2.7.0/b-3.2.2/b-colvis-3.2.2/b-html5-3.2.2/b-print-3.2.2/cr-2.0.4/date-1.5.5/fc-5.0.4/kt-2.12.1/r-3.0.4/rg-1.5.1/rr-1.5.0/sc-2.4.3/sb-1.8.2/sp-2.3.3/sl-3.0.0/sr-1.4.1/datatables.min.js" integrity="sha384-qdIpn01nfNLnrlYGCgfGwdifoUMZEc1k24OaxkPFoQx1b6ZkHWlyJbstOtqjRmcE" crossorigin="anonymous"></script>
+
+
+
+</script>

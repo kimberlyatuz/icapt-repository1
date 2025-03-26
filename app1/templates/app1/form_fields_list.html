@@ -1,0 +1,25 @@
+{% load static %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fields for "{{ user_form.label }}" - First Field: "{{ fields.first.label }}"</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <h1>{{ user_form.title }}</h1>
+    <ul>
+        {% for field in fields %}
+            <li>
+                <strong>{{ field }}</strong> (Type: {{ field.field_type }})
+                - <span class="{{ field.css_class }}">{{ field.css_class }}</span>
+            </li>
+        {% empty %}
+            <li>No fields found for this form. Please add one.</li>
+        {% endfor %}
+    </ul>
+
+    <br><br>
+    <a href="{% url 'user_forms_list' %}">Back to User Forms List</a>
+</body>
+</html>

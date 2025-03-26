@@ -1,0 +1,20 @@
+{% extents 'base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<form method="post" novalidate>
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-6">
+            {{ form|crispy }}
+        </div>
+    </div>
+    <button type="submit" class="btn btn-success"> Save</button>
+</form>
+
+{% endblock %}
+
+
+

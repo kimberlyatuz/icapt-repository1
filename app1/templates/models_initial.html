@@ -1,0 +1,39 @@
+from django import forms
+from django.contrib import admin
+#Create a method that can dynamically generate a Django form based on the field definitions stored in the database.
+from django.forms import ModelForm
+from .models import UserForm, UserFormField, FormSubmission
+
+@admin.register(UserForm)
+class UserFormCreationForm(forms.ModelForm):
+    class Meta:
+        model = UserForm
+        fields = '__all__'
+
+class UserFormFieldCreationForm(forms.ModelForm):
+    class Meta:
+        model = UserFormField
+        fields = '__all__'
+
+def create_dynamic_form(user_form):
+    class DynamicForm(forms.Form):
+        pass
+    fields = user_form.fields.all()  # Get fields related to the user form
+    for field in fields:
+        if field.field_type == 'text':
+            field_class = forms.CharField(label=field.label, required=field.required)
+        elif field.field_type == 'number':
+            field_class = forms.IntegerField(label=field.label, required=field.required)
+        elif field.field_type == 'email':
+            field_class = forms.EmailField(label=field.label, required=field.required)
+        elif field.field_type == 'textarea':
+            field_class = forms.CharField(label=field.label, required=field.required, widget=forms.Textarea)
+        elif field.field_type == 'select':
+            options = field.options.split(',') if field.options else []
+            field_class = forms.ChoiceField(label=field.label, choices=[(opt, opt) for opt in options], required=field.required)
+        elif field.field_type == 'checkbox':
+            field_class = forms.BooleanField(label=field.label, required=field.required)
+
+        DynamicForm.base_fields[field.label] = field_class
+
+    return DynamicForm

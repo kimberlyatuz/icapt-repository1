@@ -1,0 +1,131 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submissions for {{ user.username }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .submission-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        h2 {
+            cursor: pointer;
+            color: #007BFF;
+            transition: color 0.3s;
+        }
+        h2:hover {
+            color: #0056b3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .toggle-text {
+            font-weight: normal;
+            font-size: 0.9em;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Submissions for {{ user.username }}</h1>
+
+<div>
+    <input type="text" id="searchInput" placeholder="Search submissions..." onkeyup="filterSubmissions()">
+</div>
+
+{% if grouped_by_form %}
+    <div id="submissionsContainer">
+        {% for form_title, submissions in grouped_by_form.items %}
+            <div class="submission-container">
+                <h2 onclick="toggleSubmissions('{{ form_title }}')">
+                    {{ form_title }} <span id="toggle-{{ form_title }}" class="toggle-text"></span>
+                </h2>
+                <div id="submissions-{{ form_title }}" style="display: none;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>User</th>
+                                <th>Status</th>
+                                <th>Feedback</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for submission in submissions %}
+                            <tr class="submission-row">
+                                <td>{{ submission.id }}</td>
+                                <td>{{ submission.user.username }}</td>
+                                <td>{{ submission.status }}</td>
+                                <td>{{ submission.feedback }}</td>
+                                <td>
+                                    <a href="{% url 'update_submission' submission.id %}" class="edit-link">Edit</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p>No submissions available.</p>
+{% endif %}
+
+<script>
+function toggleSubmissions(formTitle) {
+    const submissionsDiv = document.getElementById(`submissions-${formTitle}`);
+    const toggleText = document.getElementById(`toggle-${formTitle}`);
+
+    submissionsDiv.style.display = submissionsDiv.style.display === "none" || submissionsDiv.style.display === "" ? "block" : "none";
+}
+
+function filterSubmissions() {
+    const input = document.getElementById('searchInput');
+    const filter = input.value.toLowerCase();
+    const rows = document.querySelectorAll('.submission-row');
+
+    rows.forEach(row => {
+        const id = row.cells[0].textContent.toLowerCase();
+        const username = row.cells[1].textContent.toLowerCase();
+        const status = row.cells[2].textContent.toLowerCase(); // Get status from the second column
+        const feedback = row.cells[3].textContent.toLowerCase();
+
+        const matchesSearch = id.includes(filter) || username.includes(filter) || status.includes(filter) || feedback.includes(filter);
+        row.style.display = matchesSearch ? "" : "none";
+    });
+}
+</script>
+
+</body>
+</html>

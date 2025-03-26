@@ -1,0 +1,13 @@
+<h1>Import Data</h1>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Upload</button>
+</form>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert">{{ message }}</div>
+    {% endfor %}
+{% endif %}

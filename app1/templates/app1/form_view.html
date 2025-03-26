@@ -1,0 +1,165 @@
+{% extends 'app1/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="card border-primary">
+    <!-- Card Header with Title and Action Buttons -->
+    <div class="card-header bg-blue-500 text-white d-flex justify-content-between align-items-center">
+        <h1 class="card-title mb-4 fw-bold fs-1">{{ user_form_instance.title }}</h1>
+        <div>
+            {% include 'partials/action.html' %}
+        </div>
+    </div>
+
+    <!-- Card Body with Form -->
+    <div class="card-body bg-gray-200">
+        <!-- Referral Number Input -->
+        <div class="mb-4">
+            <label for="referral-number" class="form-label">Enter Referral Number:</label>
+            <input type="text" id="referral-number" class="form-control" placeholder="Enter referral number">
+            <button type="button" id="fetch-patient" class="btn btn-primary mt-2">Fetch Patient Details</button>
+        </div>
+
+        <!-- Patient Details (Hidden by Default) -->
+        <div id="patient-details" class="mb-4" style="display: none;">
+            <h4>Patient Details</h4>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="first-name" class="form-label">First Name:</label>
+                    <input type="text" id="first-name" name="first_name" class="form-control" readonly>
+                </div>
+                <div class="col-md-6">
+                    <label for="last-name" class="form-label">Last Name:</label>
+                    <input type="text" id="last-name" name="last_name" class="form-control" readonly>
+                </div>
+                <div class="col-md-6">
+                    <label for="age" class="form-label">Age:</label>
+                    <input type="number" id="age" name="age" class="form-control" readonly>
+                </div>
+                <div class="col-md-6">
+                    <label for="gender" class="form-label">Gender:</label>
+                    <input type="text" id="gender" name="gender" class="form-control" readonly>
+                </div>
+                <div class="col-md-6">
+                    <label for="marital-status" class="form-label">Marital Status:</label>
+                    <input type="text" id="marital-status" name="marital_status" class="form-control" readonly>
+                </div>
+                <div class="col-md-6">
+                    <label for="education-level" class="form-label">Education Level:</label>
+                    <input type="text" id="education-level" name="education_level" class="form-control" readonly>
+                </div>
+                <div class="col-md-6">
+                    <label for="employment-status" class="form-label">Employment Status:</label>
+                    <input type="text" id="employment-status" name="employment_status" class="form-control" readonly>
+                </div>
+                <div class="col-md-6">
+                    <label for="address" class="form-label">Address:</label>
+                    <input type="text" id="address" name="address" class="form-control" readonly>
+                </div>
+                <div class="col-md-6">
+                    <label for="phone-number" class="form-label">Phone Number:</label>
+                    <input type="text" id="phone-number" name="phone_number" class="form-control" readonly>
+                </div>
+                <div class="col-md-6">
+                    <label for="diagnosis" class="form-label">Diagnosis:</label>
+                    <input type="text" id="diagnosis" name="diagnosis" class="form-control" readonly>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dynamic Form Fields -->
+        <form method="post" novalidate id="dynamic-form">
+            {% csrf_token %}
+            <div class="row g-3">
+                {% for field in form %}
+                    <div class="col-md-6">
+                        {{ field|as_crispy_field }}
+                    </div>
+                {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Submit</button>
+        </form>
+
+        <!-- Display form errors if any -->
+        {% if form.errors %}
+            <div class="alert alert-danger mt-3">
+                <strong>Error:</strong> Please correct the following issues:
+                <ul>
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ field.label }}: {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- JavaScript for Fetching Patient Details -->
+<script>
+document.getElementById('fetch-patient').addEventListener('click', function() {
+    const referralNumber = document.getElementById('referral-number').value;
+    if (referralNumber) {
+        fetch(`/api/patient-by-referral/${referralNumber}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error); // Show error message if patient not found
+                } else {
+                    // Display patient details
+                    document.getElementById('first-name').value = data.first_name;
+                    document.getElementById('last-name').value = data.last_name;
+                    document.getElementById('age').value = data.age;
+                    document.getElementById('gender').value = data.gender;
+                    document.getElementById('marital-status').value = data.marital_status;
+                    document.getElementById('education-level').value = data.education_level;
+                    document.getElementById('employment-status').value = data.employment_status;
+                    document.getElementById('address').value = data.address;
+                    document.getElementById('phone-number').value = data.phone_number;
+                    document.getElementById('diagnosis').value = data.diagnosis;
+
+                    // Show the patient details section
+                    document.getElementById('patient-details').style.display = 'block';
+                }
+            });
+    } else {
+        alert('Please enter a referral number.');
+    }
+});
+</script>
+
+<script>
+document.getElementById('fetch-patient').addEventListener('click', function() {
+    const searchQuery = document.getElementById('patient-search').value;
+    if (searchQuery) {
+        fetch(`/api/patient-search/?q=${searchQuery}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error); // Show error if no match is found
+                } else if (data.type === 'patient') {
+                    // Autofill patient details
+                    document.getElementById('first-name').value = data.first_name;
+                    document.getElementById('last-name').value = data.last_name;
+                    document.getElementById('gender').value = data.gender;
+
+                    // Show the patient details section
+                    document.getElementById('patient-details').style.display = 'block';
+                } else if (data.type === 'form') {
+                    // Autofill form details
+                    document.getElementById('form-title').value = data.title;
+                    document.getElementById('form-description').value = data.description;
+
+                    // Show the form details section
+                    document.getElementById('form-details').style.display = 'block';
+                }
+            });
+    } else {
+        alert('Please enter a search query.');
+    }
+});
+</script>
+
+{% include 'partials/_footer.html' %}
+{% endblock %}

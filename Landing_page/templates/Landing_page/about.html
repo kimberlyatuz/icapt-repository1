@@ -1,0 +1,33 @@
+{% load static %}
+
+   <head>
+      {% include 'Landing_page/partials/head.html' %}
+      </head>
+
+      <!-- end header -->
+      <!-- about -->
+      <div class="about">
+         <div class="container">
+            <div class="row">
+               <div class="col-md-12">
+                  <div class="titlepage text_align_center">
+                     <h2>About Company</h2>
+                     <p>There are many variations of passages of Lorem Ipsum available, but the majority have </p>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+      <!-- end about -->
+      <!-- footer -->
+      <footer>
+         {% include 'Landing_page/partials/footer.html' %}
+      </footer>
+      <!-- end footer -->
+      <!-- Javascript files-->
+      <script src="{% static 'js/jquery.min.js' %}"></script>
+      <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+      <script src="{% static 'js/jquery-3.0.0.min.js' %}"></script>
+      <script src="{% static 'js/custom.js' %}"></script>
+   </body>
+</html>

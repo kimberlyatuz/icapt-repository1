@@ -1,0 +1,108 @@
+{% load static %}
+{% load crispy_forms_tags %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit User Form - {{ user_form.label }}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+<!-- crispy forms -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css">
+
+</head>
+<body>
+     <a href="{% url 'user_forms_list' %}">Back to User Forms</a>
+
+<div class="container">
+    <h1>Edit User Form: {{ user_form.title}}</h1>
+    <p>UserForm ID: {{ user_form.id }}</p>
+
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li>{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <!--<form id="userForm" method="POST" action="{% url 'edit_user_form' user_form.id %}"> -->
+    <form method="post" action="{% url 'edit_user_form' user_form.id %}">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <div>
+            <label for="title">Form Title:</label>
+            <input type="text" id="title" name="title" value="{{ user_form.title }}" required>
+        </div>
+
+        <div>
+            <label for="description">Description:</label>
+            <textarea id="description" name="description">{{ user_form.description }}</textarea>
+        </div>
+
+        <h2>Fields</h2>
+<ul id="fieldList">
+    {% for field in user_form.fields.all %}
+    <li id="field_{{ field.id }}">
+        <label for="field_label_{{ field.id }}">Field Label:</label>
+        <input type="text" id="field_label_{{ field.id }}" name="field_labels" value="{{ field.label }}" required>
+        <select name="field_types">
+            {% for choice in field.FIELD_TYPES %}
+            <option value="{{ choice.0 }}" {% if field.field_type == choice.0 %}selected{% endif %}>
+                {{ choice.1 }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <input type="hidden" name="field_ids" value="{{ field.id }}">
+        <button type="submit" name="delete_field" value="{{ field.id }}">Remove Field</button>
+    {% endfor %}
+</ul>
+
+        <button type="button" onclick="addNewField()">Add New Field</button>
+
+        <div>
+            <button type="submit" >Save Changes</button>
+            <a href="{% url 'user_forms_list' %}">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    let fieldCounter = {{ user_form.fields.count }};  // Start counting new fields from existing field count
+
+function addNewField() {
+    fieldCounter++; // Increment the counter
+
+    // Add a new list item for the new field
+    const newField = document.createElement('li');
+    newField.id = `field_${fieldCounter}`;
+    newField.innerHTML = `
+        <label for="field_label_${fieldCounter}">Field Label:</label>
+        <input type="text" id="field_label_${fieldCounter}" name="field_labels" required>
+
+        <select name="field_types">
+            <option value="text">Text</option>
+            <option value="number">Number</option>
+            <option value="email">Email</option>
+            <option value="textarea">Textarea</option>
+            <option value="select">Select</option>
+            <option value="checkbox">Checkbox</option>
+            <option value="radio">Radio Button</option>
+            <option value="date">Date</option>
+        </select>
+        <button type="button" onclick="removeField(${fieldCounter})">Remove Field</button>
+    `;
+    document.getElementById('fieldList').appendChild(newField);
+}
+
+    function removeField(fieldId) {
+        const fieldElement = document.getElementById(`field_${fieldId}`);
+        if (fieldElement) {
+            fieldElement.remove();  // Remove the field from the DOM
+        }
+    }
+</script>
+</body>
+</html>

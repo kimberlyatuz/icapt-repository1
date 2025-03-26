@@ -1,0 +1,243 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+
+{% block title %}User Forms List | ICAPT{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+    }
+
+    .form-header {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    @media (min-width: 768px) {
+        .form-header {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+    }
+
+    .form-title {
+        color: #1e3a8a;
+        font-size: 2rem;
+        font-weight: 700;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .search-form {
+        position: relative;
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.75rem 1.25rem;
+        border-radius: 50px;
+        border: 1px solid rgba(30, 58, 138, 0.2);
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(5px);
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #1e3a8a;
+        box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+    }
+
+    .create-button {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .create-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .form-list {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .form-card {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        border-left: 4px solid #6b8e23;
+    }
+
+    .form-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-link {
+        color: #1e3a8a;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        display: block;
+        transition: color 0.2s;
+    }
+
+    .form-link:hover {
+        color: #3b82f6;
+        text-decoration: none;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .action-button {
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .edit-button {
+        background-color: #6b8e23;
+        color: white;
+        border: none;
+    }
+
+    .edit-button:hover {
+        background-color: #5a7a1b;
+        color: white;
+    }
+
+    .delete-button {
+        background-color: #f8f9fa;
+        color: #dc3545;
+        border: 1px solid #dc3545;
+    }
+
+    .delete-button:hover {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .empty-icon {
+        font-size: 3rem;
+        color: #6b8e23;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container p-4">
+    <header class="form-header">
+        <h1 class="form-title">Manage Forms</h1>
+
+        <div class="flex flex-col md:flex-row items-center gap-4">
+            <form method="GET" action="{% url 'user_forms_list' %}" class="search-form">
+                <input type="text"
+                       name="q"
+                       placeholder="Search forms..."
+                       class="search-input"
+                       value="{{ request.GET.q }}"
+                       aria-label="Search forms">
+            </form>
+
+            {% if user.is_superuser %}
+            <a class="create-button" href="{% url 'create_user_form' %}">
+                <i class="fas fa-plus"></i> New Form
+            </a>
+            {% endif %}
+        </div>
+    </header>
+
+    <div class="form-list">
+        {% for user_form in user_forms %}
+        <div class="form-card">
+            <a href="{% url 'form_view' user_form.id %}" class="form-link">
+                {{ user_form.title }}
+            </a>
+
+            {% if user.is_staff %}
+            <div class="form-actions">
+                <a class="action-button edit-button" href="{% url 'edit_user_form' user_form.id %}">
+                    <i class="fas fa-edit mr-1"></i> Edit
+                </a>
+                <form action="{% url 'delete_user_form' user_form.id %}" method="POST" class="inline-form">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="action-button delete-button"
+                            onclick="return confirm('Are you sure you want to delete this form?');">
+                        <i class="fas fa-trash mr-1"></i> Delete
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+        {% empty %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="icofont-ui-file"></i>
+            </div>
+            <h3 class="text-xl font-medium text-gray-700 mb-2">No forms found</h3>
+            <p class="text-gray-500">Create your first form to get started</p>
+            {% if user.is_superuser %}
+            <a href="{% url 'create_user_form' %}" class="create-button inline-block mt-4">
+                Create Form
+            </a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add any interactive functionality here
+    document.addEventListener('DOMContentLoaded', function() {
+        // Smooth transitions for cards
+        const cards = document.querySelectorAll('.form-card');
+        cards.forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(10px)';
+
+            setTimeout(() => {
+                card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    });
+</script>
+{% endblock %}

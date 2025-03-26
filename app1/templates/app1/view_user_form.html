@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ user_form.title }}</title>
+</head>
+<body>
+    <h1>{{ user_form.title }}</h1>
+    <p>{{ user_form.description }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        {% for field in fields %}
+            <div>
+                <label>{{ field.label }}</label>
+                {% if field.field_type == 'text' %}
+                    <input type="text" name="{{ field.label }}">
+                {% elif field.field_type == 'number' %}
+                    <input type="number" name="{{ field.label }}">
+                {% elif field.field_type == 'date' %}
+                    <input type="date" name="{{ field.label }}">
+                {% elif field.field_type == 'email' %}
+                    <input type="email" name="{{ field.label }}">
+                {% elif field.field_type == 'textarea' %}
+                    <textarea name="{{ field.label }}"></textarea>
+                {% elif field.field_type == 'radio' %}
+                    {% for option in field.get_options %}
+                        <label>
+                            <input type="radio" name="{{ field.label }}" value="{{ option }}">{{ option }}
+                        </label>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% endfor %}
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>

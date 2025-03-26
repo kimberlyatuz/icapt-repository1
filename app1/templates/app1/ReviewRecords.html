@@ -1,0 +1,52 @@
+{% load static %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Records</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto mt-8">
+        <div class="bg-teal-600 text-white py-4 rounded-t-lg flex justify-between items-center px-4">
+            <h1 class="text-3xl font-bold flex-grow text-center">Patient Records</h1>
+        </div>
+
+        <div class="overflow-x-auto mt-4">
+    <table class="min-w-full bg-white">
+        <thead class="bg-teal-600 text-white">
+            <tr>
+                <th class="py-2 px-4 border">Field</th>
+                <th class="py-2 px-4 border">Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if submission %}
+                {% for field_name, value in submission.data.items %}
+                    <tr class="{% if forloop.counter0|divisibleby:2 %}bg-teal-100{% else %}bg-teal-50{% endif %}">
+                        <td class="py-2 px-4 border">{{ field_name }}</td>
+                        <td class="py-2 px-4 border">{{ value }}</td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <td class="py-2 px-4 border">Feedback</td>
+                    <td class="py-2 px-4 border">{{ submission.feedback }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="2" class="py-2 px-4 border text-center">No submission data available.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Resubmit Button -->
+<div class="mt-4">
+    <a href="{% url 'resubmit_submission' submission_id=submission.id %}" class="bg-teal-700 text-white px-4 py-2 rounded">Resubmit</a>
+</div>
+
+ {% include 'partials/_footer.html' %}
+</body>
+</html>

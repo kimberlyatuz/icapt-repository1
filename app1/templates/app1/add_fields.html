@@ -1,0 +1,7 @@
+<h2>Add Fields to {{ form.title }}</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ field_form.as_p }}
+    <button type="submit">Add Fields</button>
+</form>
+<a href="{% url 'edit_user_form' %}">Done</a>

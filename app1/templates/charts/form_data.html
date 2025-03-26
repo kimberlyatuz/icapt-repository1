@@ -1,0 +1,380 @@
+{% load static %}
+{% load custom_filters %}
+{% load crispy_forms_tags %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submissions for {{ user_form.title }}</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FooTable for responsive dynamic table -->
+    <link rel="stylesheet" href="{% static 'footable/css/footable.bootstrap.min.css' %}">
+
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4cc9f0;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #4bb543;
+            --warning-color: #fca311;
+            --danger-color: #e63946;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-weight: 600;
+            border-radius: 10px 10px 0 0 !important;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .footable {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .footable thead th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+            border: none;
+            padding: 1rem;
+        }
+
+        .footable tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .footable tbody tr:hover {
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+
+        .footable tbody td {
+            padding: 0.75rem 1rem;
+            vertical-align: middle;
+            border-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .status-badge {
+            padding: 0.35rem 0.65rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-accepted {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            padding: 0.5rem 1.25rem;
+            font-weight: 500;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        .action-btn {
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .select-all-checkbox {
+            margin-right: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.25rem rgba(76, 201, 240, 0.25);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    {% block content %}
+    <div class="header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="mb-0"><i class="fas fa-file-alt me-2"></i>Submissions for {{ user_form.title }}</h1>
+                <div>
+                    <a href="#" class="btn btn-outline-light">
+                        <i class="fas fa-download me-1"></i> Export
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filter Submissions</h5>
+                <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+                    Toggle Filters
+                </button>
+            </div>
+            <div class="card-body collapse show" id="filterCollapse">
+                <form method="post" action="{% url 'admin:app1_formsubmission_changelist' %}">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        {% for field in form %}
+                        <div class="col-md-4">
+                            {{ field|as_crispy_field }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="d-flex justify-content-end mt-3">
+                        <button type="reset" class="btn btn-outline-secondary me-2">
+                            <i class="fas fa-undo me-1"></i> Reset
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-1"></i> Apply Filters
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-list me-2"></i>Submission List</h5>
+                <div class="d-flex">
+                    <form method="post" class="d-flex align-items-center">
+                        {% csrf_token %}
+                        <select name="action" class="form-select me-2" style="width: 180px;">
+                            <option value="">Bulk Actions</option>
+                            <option value="accept_selected">Accept Selected</option>
+                            <option value="reject_selected">Reject Selected</option>
+                            <option value="export_selected">Export Selected</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-play me-1"></i> Apply
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="table-container">
+                    <table class="table footable" data-paging="true" data-sorting="true" data-filtering="true" data-empty="No submissions found">
+                        <thead>
+                            <tr>
+                                <th width="40px">
+                                    <input type="checkbox" id="select-all" class="form-check-input select-all-checkbox">
+                                </th>
+                                <th>User</th>
+                                <th data-breakpoints="xs">Status</th>
+                                <th data-breakpoints="xs sm">Submitted At</th>
+                                {% if submissions %}
+                                    {% for key in submissions.0.data.keys %}
+                                        <th data-breakpoints="xs sm md">{{ key }}</th>
+                                    {% endfor %}
+                                {% endif %}
+                                <th width="100px" data-filterable="false" data-sortable="false">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for submission in submissions %}
+                            <tr>
+                                <td>
+                                    <input type="checkbox" name="_selected_action" value="{{ submission.id }}" class="form-check-input">
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar me-2">
+                                            <i class="fas fa-user-circle fa-lg text-muted"></i>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted">{{ submission.user.email }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="status-badge status-{{ submission.status|lower }}">
+                                        <i class="fas
+                                            {% if submission.status|lower == 'accepted' %}fa-check-circle
+                                            {% elif submission.status|lower == 'rejected' %}fa-times-circle
+                                            {% else %}fa-clock{% endif %} me-1"></i>
+                                        {{ submission.status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {{ submission.submitted_at|date:"M d, Y H:i" }}
+                                    <small class="d-block text-muted">{{ submission.submitted_at|timesince }} ago</small>
+                                </td>
+                                {% for key in submission.data.keys %}
+                                    <td>{{ submission.data|get_item:key|truncatechars:30 }}</td>
+                                {% endfor %}
+                                <td>
+                                    <div class="d-flex">
+                                        <a href="#" class="btn btn-sm btn-outline-primary me-1 action-btn" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-sm btn-outline-success me-1 action-btn" title="Accept">
+                                            <i class="fas fa-check"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-sm btn-outline-danger action-btn" title="Reject">
+                                            <i class="fas fa-times"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="100%">
+                                    <div class="empty-state">
+                                        <i class="fas fa-inbox"></i>
+                                        <h4>No submissions found</h4>
+                                        <p>There are currently no submissions for this form.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {% if submissions %}
+            <div class="card-footer bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted">
+                        Showing <strong>{{ submissions|length }}</strong> of <strong>{{ submissions|length }}</strong> entries
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-outline-secondary btn-sm" disabled>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm active">1</button>
+                        <button class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endblock %}
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="{% static 'footable/js/footable.min.js' %}"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize FooTable
+        FooTable.init('.footable', {
+            "paging": {
+                "enabled": true,
+                "size": 10,
+                "limit": 5
+            },
+            "sorting": {
+                "enabled": true
+            }
+        });
+
+        // Select all checkbox functionality
+        document.getElementById('select-all').addEventListener('click', function(e) {
+            const checkboxes = document.querySelectorAll('input[name="_selected_action"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = e.target.checked;
+            });
+        });
+
+        // Add confirmation for bulk actions
+        document.querySelector('select[name="action"]').addEventListener('change', function() {
+            if (this.value === 'reject_selected') {
+                if (!confirm('Are you sure you want to reject the selected submissions?')) {
+                    this.value = '';
+                }
+            }
+        });
+
+        // Add tooltips to action buttons
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+    </script>
+</body>
+</html>

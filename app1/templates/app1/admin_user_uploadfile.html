@@ -1,0 +1,795 @@
+// Retrieve the page collection and get the slicers for the active page.
+// report.off removes all event handlers for a specific event
+report.off("buttonClicked");
+
+// report.on will add an event listener.
+// Retrieve the page collection and get the visuals for the active page.
+try {
+    // report.off removes all event handlers for a specific event
+    report.off("dataSelected");
+
+    // report.on will add an event listener.
+    report.on("dataSelected", function (event) {
+        let data = event.detail;
+        console.log("Event - dataSelected:\n", data);
+    });
+
+    // Select Run and select an element of a visualization.
+    // For example, a bar in a bar chart. You should see an entry in the Log window.
+
+    console.log("Select data to see events in Log window.");
+    const pages = await report.getPages();
+
+    // Retrieve the page that contain the visual. For the sample report it will be the active page
+    let page = pages.filter(function (page) {
+        return page.isActive
+    })[0];
+
+    const visuals = await page.getVisuals();
+
+    // Retrieve the target visual.
+    let visual = visuals.filter(function (visual) {
+        return visual.name === "VisualContainer4";
+    })[0];
+
+    // Exports visual data
+    const result = await visual.exportData(models.ExportDataType.Underlying);
+    console.log(result.data);
+}
+catch (errors) {
+    console.log(errors);
+}
+report.on("buttonClicked", function (event) {
+    let data = event.detail;
+    console.log("Event - buttonClicked:\n", data);
+});
+
+// Select Run and click on a button in the report
+// For example, a Qna button. You should see an entry in the Log window.
+console.log("Click button to see event in Log window.");
+// The new settings that you want to apply to the report.
+const newSettings = {
+    // Retrieve the page collection and get the visuals for the active page.
+    try {
+        const pages = await report.getPages();
+
+        // Retrieve the page that contain the visual. For the sample report it will be the active page
+        let page = pages.filter(function (page) {
+            return page.isActive
+        })[0];
+
+        const visuals = await page.getVisuals();
+
+        // Retrieve the target visual.
+        let visual = visuals.filter(function (visual) {
+            return visual.name === "VisualContainer4";
+        })[0];
+
+        const result = await visual.exportData(models.ExportDataType.Summarized);
+        console.log(result.data);
+    }
+catch(errors) {
+        console.log(errors);
+    }
+    panes: {
+        // bookmarksManager.apply will apply the bookmark with the
+        // given name on the report.
+        // This is the actual bookmark name not the display name.
+        try {
+            await report.bookmarksManager.apply("Bookmarkaf5fe203dc1e280a4822");
+            console.log("Bookmark \"Q4 2014\" applied.");
+        }
+catch(errors) {
+            console.log(errors);
+        }
+        // Retrieve the bookmark collection and loop through to print the
+        // bookmarks' name and display name.
+        try {
+            const bookmarks = await report.bookmarksManager.getBookmarks();
+            bookmarks.forEach(function (bookmark) {
+                let log = bookmark.name + " - " + bookmark.displayName;
+                console.log(log);
+            });
+        }
+catch(error) {
+            console.log(error);
+        }
+        bookmarks: {
+            visible: true
+        }
+    }
+};
+
+// Update the settings by passing in the new settings you have configured.
+try {
+    await report.updateSettings(newSettings);
+}
+catch (error) {
+    console.log(error);
+}
+try {
+    const pages = await report.getPages();
+    // Create a theme.
+    const theme = {
+        "name": "Sample Theme",
+        "dataColors": ["#990011", "#cc1144", "#ee7799", "#eebbcc", "#cc4477", "#cc5555", "#882222", "#A30E33"],
+        "background": "#FFFFFF",
+        "foreground": "#007799",
+        "tableAccent": "#990011"
+    };
+
+    // Update the theme by passing in the custom theme.
+    // Some theme properties might not be applied if your report has custom colors set.
+    try {
+        await report.applyTheme({ themeJson: theme });
+        console.log("Custom theme applied, to remove custom theme, reload the report using 'Reload' API.");
+    }
+    catch (error) {
+        console.log(error);
+    }
+
+    // Retrieve the active page.
+    // Retrieve the page collection and get the visuals for the active page.
+    // New settings to show all the visual headers in the report
+    const newSettings = {
+        visualSettings: {
+            visualHeaders: [
+                {
+                    settings: {
+                        visible: true
+                    }
+                    // No selector - Show visual header for all the visuals in the report
+                }
+            ]
+        }
+    };
+
+    // Update the settings by passing in the new settings you have configured.
+    try {
+        await report.updateSettings(newSettings);
+        console.log("Visual header was successfully shown for all the visuals in the report.");
+    }
+    catch (error) {
+        console.log(error);
+    }
+    try {
+        // Define default visual layout: visible in 400x300.
+        // Retrieve the page collection and check if the first page has a MobilePortrait layout.
+        try {
+            const pages = await report.getPages();
+            const hasLayout = await pages[0].hasLayout(models.LayoutType.MobilePortrait);
+
+            let hasLayoutText = hasLayout ? "has" : "doesn't have";
+            console.log("Page \"" + pages[0].name + "\" " + hasLayoutText + " mobile portrait layout.");
+        }
+        catch (errors) {
+            console.log(errors);
+        }
+        let defaultLayout = {
+            width: 400,
+            height: 250,
+            displayState: {
+                mode: models.VisualContainerDisplayMode.Hidden
+            }
+        };
+
+        // Define page size as custom size: 1000x580.
+        let pageSize = {
+            type: models.PageSizeType.Custom,
+            width: 1000,
+            height: 580
+        };
+
+        // Page layout: two visible visuals in fixed position.
+        let pageLayout = {
+            defaultLayout: defaultLayout,
+            visualsLayout: {
+                "VisualContainer1": {
+                    x: 70,
+                    y: 100,
+                    displayState: {
+                        mode: models.VisualContainerDisplayMode.Visible
+                    }
+                },
+                "VisualContainer3": {
+                    x: 540,
+                    y: 100,
+                    displayState: {
+                        mode: models.VisualContainerDisplayMode.Visible
+                    }
+                }
+            }
+        };
+
+        let settings = {
+            layoutType: models.LayoutType.Custom,
+            customLayout: {
+                pageSize: pageSize,
+                displayOption: models.DisplayOption.FitToPage,
+                pagesLayout: {
+                    "ReportSection600dd9293d71ade01765": pageLayout
+                }
+            },
+            panes: {
+                filters: {
+                    visible: false
+                },
+                pageNavigation: {
+                    visible: false
+                }
+            }
+        }
+
+        // Update the settings by passing in the new settings you have configured.
+        try {
+            await report.updateSettings(settings);
+            console.log("Custom layout applied, to remove custom layout, reload the report using 'Reload' API.");
+        }
+        catch (error) {
+            console.log(error);
+        }
+        const base64Icon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEwAACxMBAJqcGAAAAu9JREFUeJzt3U9OE2Ech/FnSiKsXbh340pg5Qk8gofAY3gGtBqWXsKNIR5BF0ZkQ9h6A2pC62LAEP5ITdv3R+f7fJJ3QUh4ZzpPmaaZmReGZxf4ABwDE2C24Jhc/K33wE7D/dB/2gIOgCmLH/S7xhQYA5uN9klz2gK+sLoDf30cXsypB+KAdgf/coyb7Jnutctq/+3/63Sw3WD/VmpUvQFL8BroCubtgL2CeXXNMe3f/ZfjqMH+rVTFO2fZJsCjwrnX+sPgEAKYFc+/1q/hED4DaAEGEM4AwhlAOAMIZwDhDCCcAYQzgHAGEM4AwhlAOAMIZwDhDCCcAYQzgHAGEM4AwhlAOAMIZwDhDCCcAYQzgHAGEM4AwhlAOAMIZwDhDCCcAYQzgHAGEM4AwhlAOAMIZwDhDCDcbQEs+3n7qx7Vqvf/vjH3egctnrfvqB13rnfQ+nn7jtrxd72DDXpj4BVK8RR4DHzq6M/5X1nzZ97qv82A3Q3gDfCidltUoAOmHf0nxGfFG6MaPztqn7evWpOO/lygUH4TGM4AwhlAOAMIZwDhDCCcAYQzgHAGEM4AwhlAOAMIZwDhDCCcAYQbAb+rN0JlJiPgtHorVOZkRH+NuDIddvS3C33Dy8LTTLm4LPwX8AQvDU/zDvh4+cMm/amg+pYlR5vxmVuuBN+iv0XMm0OHO86Bfa4c/NvO+9vAHvCS/h6yG3eSaq1MgBP6//AHwPervxzCB79Z8fxr/Rr6TWA4AwhnAOEMIJwBhDOAcAYQzgDCGUA4AwhnAOEMIJwBhDOAcAYQzgDCGUA4AwhnAOEMIJwBhDOAcAYQzgDCGUA4AwhnAOEMIJwBhDOAcAYQzgDCGUA4AwhnAOEMIJwBhDOAcAYQbggBVK53MCmceymGEMBp4dwnhXMvxRACqFzvwLUWHoAdah5wfQ48b7B/msOY9gHsN9kzzaX1ege3Pm9ftVqsd3Djeft6eLbpl0M5As5Y/KCfAT+AtwzwnP8HNwiKJyPkCoYAAAAASUVORK5CYII=";
+
+        // The new settings that you want to apply to the report.
+        const newSettings = {
+            extensions: [
+                {
+                    command: {
+                        name: "extension command",
+                        title: "Extend commands",
+                        icon: base64Icon,
+                        extend: {
+                            // Define visualOptionsMenu to extend options menu
+                            visualOptionsMenu: {
+                                // Define title to override default title.
+                                // You can override default icon as well.
+                                title: "Extend options menu",
+                            }
+                        }
+                    }
+                }
+            ]
+        };
+
+        // Update the settings by passing in the new settings you have configured.
+        try {
+            await report.updateSettings(newSettings);
+        }
+        catch (error) {
+            console.log(error);
+        }
+
+        // report.off removes all event handlers for a specific event
+        report.off("commandTriggered");
+
+        // report.on will add an event handler to commandTriggered event which prints to console window.
+        report.on("commandTriggered", function (event) {
+            let commandDetails = event.detail;
+            console.log("Event - commandTriggered:\n", commandDetails);
+        });
+
+        // Select Run and open options menu to see new added items.
+        // Click on menu items added and you should see an entry in the Log window.
+
+        console.log("Open visual options menu by clicking the three dots icon and click on added items to see events in Log window.");
+        // Retrieve the page collection and get the visuals for the active page.
+        try {
+            const pages = await report.getPages();
+
+            // Retrieve the active page.
+            let page = pages.filter(function (page) {
+                return page.isActive
+            })[0];
+
+            const visuals = await page.getVisuals();
+
+            // Retrieve the target visual.
+            let visual = visuals.filter(function (visual) {
+                return visual.name === "VisualContainer4";
+            })[0];
+
+            await visual.updateFilters(models.FiltersOperations.RemoveAll);
+            console.log("\"Sentiment by Year and Months\" visual filters were removed.");
+        }
+        catch (errors) {
+            console.log(errors);
+        }
+        const pages = await report.getPages();
+
+        // Retrieve the active page.
+        let page = pages.filter(function (page) {
+            return page.isActive
+        })[0];
+
+        const visuals = await page.getVisuals();
+
+        // Retrieve the target visual.
+        let visual = visuals.filter(function (visual) {
+            return visual.name === "VisualContainer4";
+        })[0];
+
+        const filters = await visual.getFilters();
+        console.log(filters);
+    }
+    catch (errors) {
+        console.log(errors);
+    }
+    let pageWithSlicer = pages.filter(function (page) {
+        return page.isActive;
+    })[0];
+
+    const visuals = await pageWithSlicer.getVisuals();
+
+    // Retrieve all visuals with the type "slicer".
+    let slicers = visuals.filter(function (visual) {
+        return visual.type === "slicer";
+    });
+
+    slicers.forEach(async (slicer) => {
+        // Get the slicer state.
+        const state = await slicer.getSlicerState();
+        console.log("Slicer name: \"" + slicer.name + "\"\nSlicer state:\n", state);
+    });
+}
+catch (errors) {
+    console.log(errors);
+}
+// Trigger the print dialog for your browser.
+// Create the filter object. For more information see https://go.microsoft.com/fwlink/?linkid=2153364
+const filter = {
+    $schema: "http://powerbi.com/product/schema#basic",
+    target: {
+        table: "Geo",
+        column: "Region"
+    },
+    operator: "In",
+    values: ["West", "Central"]
+};
+
+// Add the filter to the report's filters.
+try {
+    await report.updateFilters(models.FiltersOperations.Add, [filter]);
+    console.log("Report filter was added.");
+}
+catch (errors) {
+    console.log(errors);
+}
+// Create the filter object. For more information see https://go.microsoft.com/fwlink/?linkid=2153364
+const filter = {
+    $schema: "http://powerbi.com/product/schema#advanced",
+    // Retrieve the page collection and get the visuals for the active page.
+    try {
+        const pages = await report.getPages();
+
+        // Retrieve the active page.
+        let pageWithSlicer = pages.filter(function (page) {
+            return page.isActive;
+        })[0];
+
+        const visuals = await pageWithSlicer.getVisuals();
+
+        // Retrieve the target visual.
+        let slicer = visuals.filter(function (visual) {
+            return visual.type === "slicer" && visual.name === "4d55baaa5eddde4cdf90";
+        })[0];
+
+        // Get the slicer state
+        const state = await slicer.getSlicerState();
+        console.log(state);
+    }
+catch(errors) {
+        console.log(errors);
+    }
+    target: {
+        table: "Date",
+        column: "Date"
+    },
+    filterType: models.FilterType.Advanced,
+    logicalOperator: "And",
+    conditions: [
+        {
+            operator: "GreaterThanOrEqual",
+            value: "2014-10-12T21:00:00.000Z"
+        },
+        {
+            operator: "LessThan",
+            value: "2014-11-28T22:00:00.000Z"
+        }
+    ]
+};
+
+// Retrieve the page collection and get the visuals for the active page.
+try {
+    const pages = await report.getPages();
+
+    // Retrieve the active page.
+    let page = pages.filter(function (page) {
+        return page.isActive;
+    })[0];
+
+    const visuals = await page.getVisuals();
+
+    // Retrieve the target visual.
+    let slicer = visuals.filter(function (visual) {
+        return visual.type === "slicer" && visual.name === "4d55baaa5eddde4cdf90";
+    })[0];
+
+    // Set the slicer state which contains the slicer filters.
+    await slicer.setSlicerState({ filters: [filter] });
+    console.log("Date slicer was set.");
+}
+catch (errors) {
+    console.log(errors);
+}
+try {
+    const title = "Embedded report";
+    await report.setComponentTitle(title);
+    console.log("The <iframe> title was set to \"" + title + "\"");
+}
+catch (errors) {
+    console.log(errors);
+}
+// Displays the report in full screen mode.
+if (!authoringPage || !lastCreatedVisual) {
+    try {
+        // Retrieve the zoom level.
+        const currentZoom = await report.getZoom();
+        console.log("Zoom level: \"" + currentZoom + "\"");
+    }
+    catch (errors) {
+        console.log(errors);
+    }
+    console.log("Make sure you created a visual on the authoring page. Please run 'Create a visual'");
+    if (!authoringPage || !lastCreatedVisual) {
+        console.log("Make sure you created a visual on the authoring page. Please run 'Create a visual'");
+    } else {
+        try {
+            await authoringPage.setActive();
+            await lastCreatedVisual.resetProperty({ objectName: "legend", propertyName: "position" });
+        }
+        catch (errors) {
+            console.log(errors);
+        }
+    }
+    if (!authoringPage || !lastCreatedVisual) {
+        console.log("Make sure you created a visual on the authoring page. Please run 'Create a visual'");
+    } else {
+        try {
+            await authoringPage.setActive();
+            const dataFields = await lastCreatedVisual.getDataFields('Y');
+            console.log("Visual 'Y' fields:\n", dataFields);
+        }
+        catch (errors) {
+            console.log(errors);
+        }
+    }
+    if (!authoringPage || !lastCreatedVisual) {
+        console.log("Make sure you created a visual on the authoring page. Please run 'Create a visual'");
+    } else {
+        try {
+            await authoringPage.setActive();
+            let dataRole = lastCreatedVisual.type === 'clusteredColumnChart' ? 'Series' : 'Breakdown';
+
+            const dataFields = await lastCreatedVisual.getDataFields(dataRole);
+
+            if (dataFields.length > 0) {
+                await lastCreatedVisual.removeDataField(dataRole, dataFields.length - 1);
+            }
+            else {
+                console.log("The visual doesn't have a data field to remove.");
+            }
+        }
+        catch (errors) {
+            console.log(errors);
+        }
+    }
+} else {
+    try {
+        await authoringPage.setActive();
+        // Getting 'Y' role data fields
+        // For more information about building data fields, see https://go.microsoft.com/fwlink/?linkid=2153697
+        const dataFields = await lastCreatedVisual.getDataFields('Y');
+
+        // Removing the second data field of 'Y' role, in order to add Legend/Breakdown
+        if (dataFields.length > 1)
+            lastCreatedVisual.removeDataField('Y', 1);
+
+        // Adding Legend/Breakdown data role
+        if (lastCreatedVisual.type === 'clusteredColumnChart') {
+            const quarterColumn = { column: 'Quarter', table: 'Date', schema: 'http://powerbi.com/product/schema#column' };
+            await lastCreatedVisual.addDataField('Series', quarterColumn);
+        } else {
+            const categoryColumn = { column: 'Category', table: 'Product', schema: 'http://powerbi.com/product/schema#column' };
+            await lastCreatedVisual.addDataField('Breakdown', categoryColumn);
+        }
+    }
+    catch (errors) {
+        console.log(errors);
+    }
+}
+if (!authoringPage || !lastCreatedVisual) {
+    if (!authoringPage || !lastCreatedVisual) {
+        console.log("Make sure you created a visual on the authoring page. Please run 'Create a visual'");
+    } else {
+        try {
+            await authoringPage.setActive();
+            const capabilities = await lastCreatedVisual.getCapabilities();
+            console.log("Visual capabilities:\n", capabilities);
+        }
+        catch (errors) {
+            console.log(errors);
+        }
+    }
+    console.log("Make sure you created a visual on the authoring page. Please run 'Create a visual'");
+} else {
+    try {
+        await authoringPage.setActive();
+        await authoringPage.deleteVisual(lastCreatedVisual.name);
+
+        // Check if there are previously created visuals and set 'lastCreatedVisual' if any were found
+        const visuals = await authoringPage.getVisuals();
+
+        if (visuals.length > 0) {
+            lastCreatedVisual = visuals[visuals.length - 1];
+        } else {
+            lastCreatedVisual = undefined;
+        }
+    }
+    catch (errors) {
+        console.log(errors);
+    }
+}
+if (!authoringPage || !lastCreatedVisual) {
+    console.log("Make sure you created a visual on the authoring page. Please run 'Create a visual'");
+} else {
+    try {
+        await authoringPage.setActive();
+        await lastCreatedVisual.changeType('waterfallChart');
+
+        // When caching the visual object, you need to manually update the visual type
+        lastCreatedVisual.type = 'waterfallChart';
+    }
+    catch (errors) {
+        console.log(errors);
+    }
+}
+// setPage will change the selected view to the page you indicate.
+if (!authoringPage) {
+    console.log("Authoring page is undefined. Please run 'Create an authoring page' first.");
+} else {
+    // Creating new visual
+    // For more information about report authoring, see https://go.microsoft.com/fwlink/?linkid=2153366
+    try {
+        await authoringPage.setActive();
+        const response = await authoringPage.createVisual('clusteredColumnChart');
+        window.lastCreatedVisual = response.visual;
+
+        // Defining data fields
+        const regionColumn = { column: 'Region', table: 'Geo', schema: 'http://powerbi.com/product/schema#column' };
+        const totalUnitsMeasure = { measure: 'Total Units', table: 'SalesFact', schema: 'http://powerbi.com/product/schema#measure' };
+        const totalVanArsdelUnitsMeasure = { measure: 'Total VanArsdel Units', table: 'SalesFact', schema: 'http://powerbi.com/product/schema#measure' };
+
+        // Adding visual data fields
+        lastCreatedVisual.addDataField('Category', regionColumn);
+        lastCreatedVisual.addDataField('Y', totalUnitsMeasure);
+        lastCreatedVisual.addDataField('Y', totalVanArsdelUnitsMeasure);
+    }
+    catch (errors) {
+        console.log(errors);
+    }
+}
+// This is the actual page name not the display name.
+try {
+    const pageName = "Authoring page";
+    if (authoringPage) {
+        if (!authoringPage) {
+            console.log("Authoring page is undefined. Please run 'Create an authoring page' first.");
+        } else {
+            try {
+                // Get required page name.
+                const oldDisplayName = authoringPage.displayName;
+                const newDisplayName = "New page name";
+
+                // Rename the page.
+                await authoringPage.setDisplayName(newDisplayName);
+                console.log("Page name was updated to \"" + newDisplayName + "\" from \"" + oldDisplayName + "\".");
+            }
+            catch (errors) {
+                console.log(errors);
+            }
+        }
+        if (!authoringPage) {
+            console.log("Authoring page is undefined. Please run 'Create an authoring page' first.");
+        } else {
+            try {
+                // Get required page name.
+                const pageName = authoringPage.name;
+
+                // Delete the page.
+                await report.deletePage(pageName);
+                console.log("Existing authoring page with name \"" + pageName + "\" has been deleted.");
+                authoringPage = undefined;
+
+                const pages = await report.getPages();
+
+                // Get the visible pages in view mode.
+                const visiblePages = pages.filter((page) => page.visibility == 0);
+
+                if (visiblePages.length > 0) {
+                    await visiblePages[0].setActive();
+                }
+            }
+            catch (errors) {
+                console.log(errors);
+            }
+        }
+        console.log(pageName + " already exists.")
+        await authoringPage.setActive();
+        return;
+    }
+
+    // Adds a new page for the authoring APIs
+    window.authoringPage = await report.addPage(pageName);
+    console.log("A new page for the authoring APIs was created, next step would be to use the 'Create a visual' API");
+} catch (errors) {
+    console.log(errors);
+}
+const pageName = "ReportSectiona271643cba2213c935be"
+try {
+    await report.setPage(pageName);
+    console.log(`Page was set to: ${pageName}`);
+}
+catch (errors) {
+    console.log(errors);
+}
+// Get the current active page
+try {
+    const activePage = await report.getActivePage();
+
+    console.log("The active page is \"" + activePage.name + "\" with display name \"" + activePage.displayName + "\"");
+}
+catch (errors) {
+    console.log(errors);
+}
+report.fullscreen();
+// Refresh the displayed report
+try {
+    // Retrieve the page collection and get the visuals for the active page.
+    try {
+        const pages = await report.getPages();
+        // Retrieve the page that contain the visual. For the sample report it will be the active page
+        let page = pages.filter(function (page) {
+            return page.isActive
+        })[0];
+
+        const visuals = await page.getVisuals();
+        console.log(
+            visuals.map(function (visual) {
+                return {
+                    name: visual.name,
+                    type: visual.type,
+                    title: visual.title,
+                    layout: visual.layout
+                };
+            }));
+    }
+    catch (errors) {
+        console.log(errors);
+    }
+    await report.refresh();
+    console.log("Refreshed");
+}
+catch (errors) {
+    console.log(errors);
+}
+try {
+    await report.print();
+}
+// Reload the displayed report
+try {
+    await report.reload();
+}
+catch (errors) {
+    console.log(errors);
+}
+catch (errors) {
+    console.log(errors);
+}
+let loadedResolve, reportLoaded = new Promise((res, rej) => { loadedResolve = res; });
+let renderedResolve, reportRendered = new Promise((res, rej) => { renderedResolve = res; });
+
+// Get models. models contains enums that can be used.
+models = window['powerbi-client'].models;
+
+// Embed a Power BI report in the given HTML element with the given configurations
+// Read more about how to embed a Power BI report in your application here: https://go.microsoft.com/fwlink/?linkid=2153590
+function embedPowerBIReport() {
+    /*-----------------------------------------------------------------------------------+
+    |    Don't change these values here: access token, embed URL and report ID.          | 
+    |    To make changes to these values:                                                | 
+    |    1. Save any other code changes to a text editor, as these will be lost.         |
+    |    2. Select 'Start over' from the ribbon.                                         |
+    |    3. Select a report or use an embed token.                                       |
+    +-----------------------------------------------------------------------------------*/
+    // Read embed application token
+    let accessToken = EMBED_ACCESS_TOKEN;
+
+    // Read embed URL
+    let embedUrl = EMBED_URL;
+
+    // Read report Id
+    let embedReportId = REPORT_ID;
+
+    // Read embed type from radio
+    let tokenType = TOKEN_TYPE;
+
+    // We give All permissions to demonstrate switching between View and Edit mode and saving report.
+    let permissions = models.Permissions.All;
+
+    // Create the embed configuration object for the report
+    // For more information see https://go.microsoft.com/fwlink/?linkid=2153590
+    let config = {
+        type: 'report',
+        tokenType: tokenType == '0' ? models.TokenType.Aad : models.TokenType.Embed,
+        accessToken: accessToken,
+        embedUrl: embedUrl,
+        id: embedReportId,
+        permissions: permissions,
+        settings: {
+            panes: {
+                filters: {
+                    visible: true
+                },
+                pageNavigation: {
+                    visible: true
+                }
+            },
+            bars: {
+                statusBar: {
+                    visible: true
+                }
+            }
+        }
+    };
+
+    // Get a reference to the embedded report HTML element
+    let embedContainer = $('#embedContainer')[0];
+
+    // Embed the report and display it within the div container.
+    report = powerbi.embed(embedContainer, config);
+
+    // report.off removes all event handlers for a specific event
+    report.off("loaded");
+
+    // report.on will add an event handler
+    report.on("loaded", function () {
+        loadedResolve();
+        report.off("loaded");
+    });
+
+    // report.off removes all event handlers for a specific event
+    report.off("error");
+
+    report.on("error", function (event) {
+        console.log(event.detail);
+    });
+
+    // report.off removes all event handlers for a specific event
+    report.off("rendered");
+
+    // report.on will add an event handler
+    report.on("rendered", function () {
+        renderedResolve();
+        report.off("rendered");
+    });
+}
+
+embedPowerBIReport();
+await reportLoaded;
+
+// Insert here the code you want to run after the report is loaded
+
+await reportRendered;
+
+// Insert here the code you want to run after the report is rendered
+

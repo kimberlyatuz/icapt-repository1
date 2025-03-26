@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submissions List</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        .user-list {
+            list-style: none;
+            padding: 0;
+        }
+        .user-list li {
+            margin: 10px 0;
+            padding: 10px;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .user-list a {
+            text-decoration: none;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Submissions from Staff Users</h1>
+<ul class="user-list">
+    {% for user in staff_users %}
+        <li>
+            <a href="{% url 'user_submissions' user.id %}">{{ user.username }}</a>
+        </li>
+    {% endfor %}
+</ul>
+
+</body>
+</html>

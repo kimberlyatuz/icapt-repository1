@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Submissions</title>
+</head>
+<body>
+    <h1>Your Submissions</h1>
+    <ul>
+        {% for submission in submissions %}
+            <li>{{ submission.content }} ({{ submission.created_at }})</li>
+        {% empty %}
+            <li>No submissions found.</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'create_submission' %}">Create a new submission</a>
+</body>
+</html>

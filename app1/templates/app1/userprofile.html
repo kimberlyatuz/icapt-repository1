@@ -1,0 +1,13 @@
+<h1>User Profile</h1>
+<p>Username: {{ profile.user.username }}</p>
+<p>Contact: {{ profile.phone }}</p>
+<p>Email: {{ profile.email }}</p>
+
+<h2>Your Form Submissions</h2>
+<ul>
+    {% for submission in submissions %}
+        <li>{{ submission.content }} ({{ submission.created_at }})</li>
+    {% empty %}
+        <li>No submissions found.</li>
+    {% endfor %}
+</ul>

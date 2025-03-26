@@ -1,0 +1,135 @@
+
+ <head>
+      <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet"/>
+ <!-- Bootstrap CSS and JS -->
+     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <title>
+   Patient Data Management
+  </title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+ </head>
+
+  <body class="bg-gradient-to-r from-blue-100 to-blue-300 font-roboto min-h-screen flex items-center justify-center">
+ <nav class="fixed-top">
+    {% include 'partials/navbar.html' %}
+  </nav>
+
+ <div class="container">
+  <div class="container mx-auto p-4  mt-16">
+   <div class="text-center mb-12">
+    <h1 class="text-4xl font-bold text-gray-800">
+     Welcome to ICAPT {{ user.username }}!
+    </h1>
+    <p class="text-gray-700 mt-2">
+     Please select an option to proceed
+    </p>
+   </div>
+   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+    <div class="bg-white p-8 rounded-lg shadow-lg text-center transform transition duration-500 hover:scale-105">
+     <img alt="Icon representing patient records" class="mx-auto mb-6" height="100" src="https://storage.googleapis.com/a1aa/image/006QEj89TTAxSwq1qCAT-_KT-RI01Y8zEUyhs03_Ayc.jpg" width="100"/>
+     <h2 class="text-2xl font-semibold text-gray-800 mb-4">
+      Patient Records
+     </h2>
+     <p class="text-gray-600 mb-6">
+      Find a form and enter data.
+     </p>
+     <button
+  class="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700"
+  onclick="window.location.href='{% url 'user_forms_list' %}'">
+  Select
+</button>
+
+    </div>
+    <div class="bg-white p-8 rounded-lg shadow-lg text-center transform transition duration-500 hover:scale-105">
+     <img alt="Icon representing appointments" class="mx-auto mb-6" height="100" src="https://storage.googleapis.com/a1aa/image/QhKK9UvgdDTC-GkDPewIocLMIbOHZDa2dQh6hXbMaco.jpg" width="100"/>
+     <h2 class="text-2xl font-semibold text-gray-800 mb-4">
+      Submissions
+     </h2>
+     <p class="text-gray-600 mb-6">
+      View your submissions.
+     </p>
+     <button
+  class="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700"
+  onclick="window.location.href='{% url 'Submissions' %}'">
+  Select
+</button>
+
+    </div>
+    <div class="bg-white p-8 rounded-lg shadow-lg text-center transform transition duration-500 hover:scale-105">
+     <img alt="Icon representing billing" class="mx-auto mb-6" height="100" src="https://storage.googleapis.com/a1aa/image/9QNO08dQ8v-ZvrD60frFosiBwpw2Gw0UHqzJw8G5RW8.jpg" width="100"/>
+     <h2 class="text-2xl font-semibold text-gray-800 mb-4">
+      Analysis
+     </h2>
+     <p class="text-gray-600 mb-6">
+      View your prediction and dashboard
+     </p>
+     <button
+  class="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700"
+  onclick="window.location.href='{% url 'predictive_analytics' %}'">
+  Select
+</button>
+
+    </div>
+    <div class="bg-white p-8 rounded-lg shadow-lg text-center transform transition duration-500 hover:scale-105">
+  <img alt="Icon representing reports" class="mx-auto mb-6" height="100" src="https://storage.googleapis.com/a1aa/image/SPJz6jU1LOb1fTQLwHt2NO3ZDbjxbfC9JdsJQgmpdI4.jpg" width="100"/>
+  <h2 class="text-2xl font-semibold text-gray-800 mb-4">
+    Review My Records
+  </h2>
+  <p class="text-gray-600 mb-6">
+    View Records that need your urgent attention
+  </p>
+
+  <!-- Button to Trigger Modal -->
+  <button
+    class="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700"
+    data-toggle="modal"
+    data-target="#reviewRecordsModal"
+  >
+    Select
+  </button>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="reviewRecordsModal" tabindex="-1" role="dialog" aria-labelledby="reviewRecordsModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reviewRecordsModalLabel">Review Records</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        {% if rejected_submissions %} <!-- Opening if block -->
+          <ul>
+            {% for submission in rejected_submissions %}
+              <li>
+                <a href="{% url 'ReviewRecords' submission_id=submission.id %}">View Record for Submission {{ submission.id }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %} <!-- Else block -->
+          <p>No rejected submissions available.</p>
+        {% endif %} <!-- Closing if block -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+   </div>
+  </div>
+     </div>
+ </body>
+     </div>
+
+ </div>

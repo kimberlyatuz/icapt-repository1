@@ -1,0 +1,384 @@
+{% extends 'partials/base.html' %}
+{% load custom_filters %}
+
+{% block title %}ICAPT | Form Submissions{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
+<style>
+    .form-container {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        padding: 20px;
+        margin-top: 20px;
+    }
+
+    .nav-tabs .nav-link {
+        color: #1e3a8a;
+        font-weight: 500;
+        border: none;
+        padding: 12px 20px;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #1e3a8a;
+        font-weight: 600;
+        border-bottom: 3px solid #1e3a8a;
+        background: transparent;
+    }
+
+    .table thead th {
+        background-color: #1e3a8a;
+        color: white;
+    }
+
+    .action-buttons .btn {
+        margin-right: 5px;
+    }
+
+    /* Style for editable cells */
+    td.editable {
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    td.editable:hover {
+        background-color: #f8f9fa;
+    }
+
+    .edit-mode td.editable {
+        background-color: #fff8e1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-navy-800">
+            <i class="icofont-file-text me-2"></i>Form Submissions
+        </h2>
+
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link active" href="#">
+                    <i class="fas fa-table me-1"></i> View
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'import_data' %}">
+                    <i class="fas fa-file-import me-1"></i> Import
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <form method="POST" class="mb-4">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-6">
+                <select name="form_id" class="form-select" onchange="this.form.submit()">
+                    <option value="">Select Form to View</option>
+                    {% for form in forms %}
+                        <option value="{{ form.id }}" {% if submissions and submissions.0.user_form_id == form.id %}selected{% endif %}>
+                            {{ form.title }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <noscript>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary">View</button>
+                </div>
+            </noscript>
+        </div>
+    </form>
+
+    <div class="form-container">
+        {% if submissions %}
+        <form id="export-form" method="POST" action="{% url 'export_data' %}" class="mb-3">
+            {% csrf_token %}
+            <input type="hidden" name="form_id" value="{{ submissions.0.user_form_id }}">
+            <div class="row">
+                <div class="col-md-3 mb-2">
+                    <select name="file-format" class="form-select" required>
+                        <option value="">Export Format</option>
+                        <option value="CSV">CSV</option>
+                        <option value="JSON">JSON</option>
+                        <option value="XLS (Excel)">Excel</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary">Export</button>
+                </div>
+            </div>
+        </form>
+
+        <table id="submissions-table" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Status</th>
+                    {% if request.user.is_superuser %}
+                        <th>Staff</th>
+                    {% endif %}
+                    {% for field_name in field_names %}
+                        <th>{{ field_name }}</th>
+                    {% endfor %}
+                    {% if can_edit %}
+                        <th>Actions</th>
+
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for submission in submissions %}
+                <tr id="row-{{ submission.id }}">
+                    <td>{{ forloop.counter }}</td>
+                    <td class="status-cell">{{ submission.status }}</td>
+                    {% if request.user.is_superuser %}
+                        <td>{{ submission.user.username }}</td>
+                    {% endif %}
+                    {% for field_name in field_names %}
+                        <td class="editable" data-field="{{ field_name }}">{{ submission.get_data|get:field_name }}</td>
+                    {% endfor %}
+                    {% if can_edit %}
+                    <td class="action-buttons">
+                        {% if submission.status == 'pending' %}
+                        <button class="btn btn-warning btn-sm edit-btn" data-id="{{ submission.id }}">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-success btn-sm save-btn" data-id="{{ submission.id }}" style="display: none;">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+                        <form method="POST" action="{% url 'Submissions' %}" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="submission_id" value="{{ submission.id }}">
+                            <button type="submit" name="delete" class="btn btn-danger btn-sm delete-btn"
+                                    onclick="return confirm('Delete this submission?')">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </form>
+                       {% else %}
+                        <span class="text-muted">Editing disabled</span>
+    {% endif %}
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-warning text-center py-4">
+            <i class="icofont-file-text display-4 mb-3"></i>
+            <h4>No Submissions Found</h4>
+            <p>Select a form to view its submissions</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- DataTables JS (TOASTR FOR BETTER NITIFIATIONS)-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+
+<script>
+    // Add CSRF token handling for AJAX
+    $.ajaxSetup({
+    headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+        "Content-Type": "application/json"
+    }
+});
+
+    $(document).ready(function() {
+        $('#submissions-table').DataTable({
+            dom: 'Bfrtip',
+            buttons: [
+                'copy', 'csv', 'excel', 'json'
+            ],
+            pageLength: 25,
+            responsive: true
+        });
+
+        // Track edit mode
+        let editMode = false;
+        let currentEditRow = null;
+
+        // Edit button click handler
+        $('.edit-btn').click(function() {
+            const submissionId = $(this).data('id');
+            const row = $(`#row-${submissionId}`);
+            const status = row.find('.status-cell').text().trim();
+
+            // Check if submission is editable
+            if (status !== 'pending') {
+                alert('This submission can no longer be edited as it has been processed');
+                return;
+            }
+
+            if (editMode && currentEditRow && currentEditRow.attr('id') !== row.attr('id')) {
+                // If already in edit mode for a different row, cancel that first
+                cancelEdit(currentEditRow);
+            }
+
+            if (row.hasClass('edit-mode')) {
+                // Cancel edit mode
+                cancelEdit(row);
+            } else {
+                // Enter edit mode
+                enterEditMode(row);
+            }
+        });
+
+        // Save button click handler
+        $('.save-btn').click(function() {
+            const submissionId = $(this).data('id');
+            const row = $(`#row-${submissionId}`);
+            saveChanges(row);
+        });
+
+        function enterEditMode(row) {
+            editMode = true;
+            currentEditRow = row;
+            row.addClass('edit-mode');
+
+            // Show save button, hide edit button
+            row.find('.edit-btn').hide();
+            row.find('.save-btn').show();
+
+            // Make all editable cells in this row editable
+            row.find('td.editable').each(function() {
+                const cell = $(this);
+                const currentValue = cell.text().trim();
+                cell.html(`<input type="text" value="${currentValue}" class="form-control form-control-sm">`);
+                cell.find('input').focus();
+            });
+        }
+
+        function cancelEdit(row) {
+            editMode = false;
+            currentEditRow = null;
+            row.removeClass('edit-mode');
+
+            // Show edit button, hide save button
+            row.find('.edit-btn').show();
+            row.find('.save-btn').hide();
+
+            // Revert all editable cells to their original values
+            row.find('td.editable').each(function() {
+                const cell = $(this);
+                const originalValue = cell.data('original-value') || cell.text().trim();
+                cell.text(originalValue);
+            });
+        }
+
+        function saveChanges(row) {
+    const submissionId = row.attr('id').replace('row-', '');
+    const dataToUpdate = {};
+    const csrfToken = "{{ csrf_token }}";
+
+    // Collect all changed values
+    row.find('td.editable').each(function() {
+        const cell = $(this);
+        const fieldName = cell.data('field');
+        const input = cell.find('input');
+
+        if (input.length) {
+            const newValue = input.val().trim();
+            dataToUpdate[fieldName] = newValue;
+            cell.text(newValue);
+        }
+    });
+
+    // Show loading state
+    const saveBtn = row.find('.save-btn');
+    saveBtn.html('<i class="fas fa-spinner fa-spin"></i> Saving...');
+    saveBtn.prop('disabled', true);
+
+    // Send AJAX request to save
+    $.ajax({
+        url: "{% url 'update_submission' 0 %}".replace('0', submissionId),
+        method: 'POST',
+        headers: {
+            "X-CSRFToken": csrfToken,
+            "Content-Type": "application/json"
+        },
+        data: JSON.stringify(dataToUpdate),
+        success: function(response) {
+            if (response.success) {
+                editMode = false;
+                currentEditRow = null;
+                row.removeClass('edit-mode');
+                row.find('.edit-btn').show();
+                row.find('.save-btn').hide().prop('disabled', false);
+
+                row.find('td.editable').each(function() {
+                    $(this).data('original-value', $(this).text().trim());
+                });
+
+                toastr.success(response.message || 'Changes saved successfully');
+            } else {
+                toastr.error(response.error || 'Error saving changes');
+                row.find('td.editable').each(function() {
+                    const cell = $(this);
+                    cell.text(cell.data('original-value') || '');
+                });
+            }
+        },
+        error: function(xhr) {
+            let errorMsg = 'Error saving changes';
+            try {
+                const response = JSON.parse(xhr.responseText);
+                errorMsg = response.error || errorMsg;
+            } catch (e) {
+                errorMsg = xhr.statusText || errorMsg;
+            }
+
+            toastr.error(errorMsg);
+            row.find('td.editable').each(function() {
+                const cell = $(this);
+                cell.text(cell.data('original-value') || '');
+            });
+        },
+        complete: function() {
+            saveBtn.html('<i class="fas fa-save"></i> Save');
+            saveBtn.prop('disabled', false);
+        }
+    });
+}
+
+        // Store original values when page loads
+        $('td.editable').each(function() {
+            $(this).data('original-value', $(this).text().trim());
+        });
+
+        // Handle click on editable cells (optional)
+        $('td.editable').click(function() {
+            if (!editMode) return;
+
+            const cell = $(this);
+            const currentValue = cell.text().trim();
+            cell.html(`<input type="text" value="${currentValue}" class="form-control form-control-sm">`);
+            cell.find('input').focus().select();
+
+            // Handle save on blur or enter key
+            cell.find('input').on('blur keypress', function(e) {
+                if (e.type === 'keypress' && e.which !== 13) return;
+
+                const newValue = $(this).val().trim();
+                cell.text(newValue);
+            });
+        });
+    });
+</script>
+{% endblock %}

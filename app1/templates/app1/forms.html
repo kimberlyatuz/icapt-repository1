@@ -1,0 +1,49 @@
+{% load static%}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forms for Data Entry</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4">
+        <header class="flex justify-between items-center mb-6">
+            <h1 class="text-teal-600 text-3xl font-bold">Forms for Data Entry</h1>
+            <div class="relative">
+                <input type="text" placeholder="Search by:" class="border rounded-full p-2 pl-10 w-full max-w-xs">
+                <i class="fas fa-search absolute left-3 top-2.5 text-gray-400"></i>
+            </div>
+        </header>
+        <div class="space-y-4">
+            <div class="bg-white shadow-md rounded-lg p-4">
+                <h2><a class="text-teal-600 font-semibold" href="{% url 'enter_data' %}">Active patients Register</a></h2>
+                <p class="text-gray-600 mt-2">Description of what this is i.e purpose to the organisation etc</p>
+            </div>
+            <div class="bg-white shadow-md rounded-lg p-4">
+                <h2><a class="text-teal-600 font-semibold" href="{% url 'enter_data' %}">Dementia Register</a></h2>
+                <p class="text-gray-600 mt-2">Description of what this is i.e purpose to the organisation etc</p>
+            </div>
+            <div class="bg-white shadow-md rounded-lg p-4">
+                <h2><a class="text-teal-600 font-semibold" href="{% url 'enter_data' %}">Register for Breast Cancer Screening</a></h2>
+                <p class="text-gray-600 mt-2">Description of what this is i.e purpose to the organisation etc</p>
+            </div>
+        </div>
+        <footer class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-around">
+            <div class="text-center">
+                <i class="fas fa-home text-2xl text-teal-600"></i>
+                <p><a class="text-teal-600" href="{% url 'index' %}">Home</a></p>
+            </div>
+            <div class="text-center">
+                <i class="fas fa-tachometer-alt text-2xl text-gray-400"></i>
+                <p class="text-gray-400">Dashboard</p>
+            </div>
+            <div class="text-center">
+                <i class="fas fa-file-alt text-2xl text-gray-400"></i>
+                <p><a class="text-gray-400" href="{% url 'Forms' %}">Forms</a></p>
+            </div>
+        </footer>
+    </div>
+    <script src="https://cdn.tailwindcss.com"></script>
+</body>
+</html>

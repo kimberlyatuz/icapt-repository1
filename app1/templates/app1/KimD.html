@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dynamic Form</title>
+</head>
+<body>
+    <h1>Dynamic Form</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="hidden" name="extra_fields" value="field1">
+        <input type="hidden" name="extra_fields" value="field2">
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>
