@@ -26,7 +26,18 @@ SECRET_KEY = 'django-insecure-r-li6$#2ai8p-5o%(0#2uuw@f=5g*2#kzg*-hsjxg#jion4ve4
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+'icapt-913b8e69f590.herokuapp.com',  # Your exact Heroku URL
+    '.herokuapp.com',                     # Wildcard for all Heroku subdomains
+]
+
+# Only allow localhost in DEBUG mode (for development)
+if os.environ.get('DEBUG') == 'True':
+    ALLOWED_HOSTS.extend(['localhost', '127.0.0.1'])
+
+    heroku
+    config: set
+    DEBUG = False
 
 
 # Application definition
@@ -380,3 +391,12 @@ CSP_FRAME_ANCESTORS = ("'self'", "http://localhost:5003")
 
 import sys
 sys.setrecursionlimit(1500)  # Increase the limit
+
+# Heroku production settings
+if 'DYNO' in os.environ:  # Checks if running on Heroku
+    DEBUG = False
+    SECURE_SSL_REDIRECT = True  # Force HTTPS
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+else:
+    DEBUG = True  # Local development
