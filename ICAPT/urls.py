@@ -29,10 +29,8 @@ urlpatterns = [
 urlpatterns += i18n_patterns(
     path('', include('app1.urls')),
     path('ME/', include('ME.urls')),
-    path('',include('django_dyn_dt.urls')),
 
     # Third-party packages that need translation
-    path('', include('django_dyn_dt.urls')),
     path('accounts/', include('registration.backends.default.urls')),
 )
 

@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os, inspect
-import django_dyn_dt   #for creating te dynamic tables to be stored in the database
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -49,7 +48,6 @@ INSTALLED_APPS = (
     'Landing_page',
     'accounts',
     'import_export',
-    'django_dyn_dt',
     'django_tables2',
 
 )
@@ -74,12 +72,11 @@ X_FRAME_OPTIONS = 'ALLOWALL'
 ROOT_URLCONF = 'ICAPT.urls'
 
 
-TEMPLATE_DIR_DATATAB = os.path.join(BASE_DIR, "django_dyn_dt/templates")
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'templates'), TEMPLATE_DIR_DATATAB,
+            os.path.join(BASE_DIR, 'templates'),
             os.path.join(BASE_DIR, 'crispy_bootstrap5/templates'),
             os.path.join(BASE_DIR, 'crispy_bootstrap5/templates/layout'),
         ],
@@ -341,10 +338,6 @@ STATIC_FILES_DIRS = [
 ]
 # FOR THEN DEPLOYING APP TO A REMOTE SERVER
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
-DYN_DB_PKG_ROOT = os.path.dirname(inspect.getfile(django_dyn_dt))
-STATIC_FILES_DIRS = (os.path.join(DYN_DB_PKG_ROOT, "templates/static"),
-                      )
 # settings.py
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
