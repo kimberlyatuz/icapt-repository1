@@ -29,6 +29,10 @@ DEBUG = os.environ.get("Debug", "False").lower() == "true"
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split(" ")
 
+# Session/Cookie settings (important for login)
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
 
 # Application definition
 
@@ -334,8 +338,9 @@ STATIC_URL = '/static/'
 
 # TO CONNECT THE STATIC FILE
 # Additional directories to look for static files during development
-STATIC_FILES_DIRS = [
+STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'ICAPT/static'),
+    os.path.join(BASE_DIR, 'app1/static'),
 ]
 # FOR THEN DEPLOYING APP TO A REMOTE SERVER
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
