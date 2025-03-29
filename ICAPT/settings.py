@@ -377,7 +377,7 @@ LOCALE_PATHS = [
 ]
 
 #LOGIN_URL = 'admin:login'  # Force admin login URL
-LOGIN_REDIRECT_URL = '/'    # Redirect after successful login
+LOGIN_REDIRECT_URL = 'index'    # Redirect after successful login
 #LOGOUT_REDIRECT_URL = 'logout_url',  # Redirect after logout
 
 
