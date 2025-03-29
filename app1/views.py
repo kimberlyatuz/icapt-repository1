@@ -73,9 +73,6 @@ logger = logging.getLogger(__name__)
 # Create your views here.
 @unauthenticated_user
 def loginpage(request):
-    print("Login view accessed") 
-    if request.method == 'POST':
-        print(f"Login attempt with: {request.POST}")
     #if request.user.is_authenticated:
         #return redirect('index')
     #else: commented out because now we use the decortor instead
