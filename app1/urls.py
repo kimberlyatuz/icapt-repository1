@@ -8,16 +8,12 @@ from .views import review_submissions, ReviewRecords, \
 
 urlpatterns = [
     # user's side
-    # path('', landing_views.index, name='index'),  # Landing page
-    # path('about', landing_views.about, name='about'),
     path('', views.index, name='index'),
     path('login', views.loginpage, name='login'),
     path('forgot_password', views.export_data, name='forgot_password'),
     path('reset_password', views.export_data, name='reset_password'),
     path('export_data', views.export_data, name='export_data'),
-
     path('unauthorized/', unauthorized, name='unauthorized'),
-
     path('logout', views.logoutuser, name='logout'),
     path('register', views.register, name='register'),
     path('me_dashboard/', ME_Dashboard, name='me_dashboard'),
