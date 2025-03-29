@@ -121,8 +121,7 @@ def unauthorized(request):
     return HttpResponseForbidden("You don't have access to this page.")
 
 
-@login_required(login_url='login')
-@user_passes_test(lambda u: u.groups.filter(name='staff').exists(), login_url='login')
+
 def index(request):
     # Get all submissions (or adjust query as needed)
     submissions = FormSubmission.objects.all()
