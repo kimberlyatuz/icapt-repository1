@@ -111,7 +111,7 @@ print("Database URL:", repr(database_url)) # Debugging line
 
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgresql://icapt_db_user:NbSYSRIoVae7AhsAP6BbqmC6lRlgffZ6@dpg-cvju70hr0fns739kaehg-a.oregon-postgres.render.com/icapt_db',
+        default='',
         conn_max_age=600
     )
 }
