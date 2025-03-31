@@ -88,22 +88,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ICAPT.wsgi.application'
 
-# Database configuration
+# Database configuration - Updated for Render.com
 DATABASES = {
-    'default': {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",    
-    }
+    'default': dj_database_url.config(
+        # Fallback to SQLite for local development if no DATABASE_URL
+        default='sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3'),
+        conn_max_age=600
+    )
 }
 
-database_url = os.environ.get("DATABASE_URL")
-DATABASES["default"] = dj_database_url.parse(database_url)
-
-# For Render.com specifically - ensure it always uses their database URL
+# For Render.com specifically - alternative approach
 if os.environ.get('RENDER'):
     DATABASES['default'] = dj_database_url.config(
         conn_max_age=600,
-        # This will use RENDER's DATABASE_URL automatically
+        # ssl_require=True  # Important for Render.com's PostgreSQL
     )
 
 # Password validation
