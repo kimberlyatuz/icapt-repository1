@@ -65,6 +65,14 @@ MIDDLEWARE = [
 ]
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
+# Allow Render.com's domain in CSRF trusted origins
+CSRF_TRUSTED_ORIGINS = [
+    'https://icapt11.onrender.com',
+    'https://*.onrender.com',
+]
+
+# Ensure HTTPS is detected (for Render.com)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 ROOT_URLCONF = 'ICAPT.urls'
 
