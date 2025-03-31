@@ -105,13 +105,10 @@ WSGI_APPLICATION = 'ICAPT.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'dbmsp',
-        'USER': 'root',
-        'PASSWORD': 'nyasha2020',
-        'PORT': '3306',
-    }
+    'default': dj_database_url.config(
+        default='postgresql://postgres:postgres@localhost:5432/icapt',
+        conn_max_age=600
+    )
 }
 database_url = os.environ.get("DATABASE_URL")
 DATABASES["default"] = dj_database_url.parse(database_url)
