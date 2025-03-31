@@ -88,16 +88,21 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ICAPT.wsgi.application'
 
-# Database
-database_url = os.environ.get("DATABASE_URL")
-
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
 # Database configuration
-DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://postgres:postgres@localhost:5432/icapt')
 DATABASES = {
-    'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+    'default': dj_database_url.config(
+        # Fallback value for local development
+        default='postgresql://postgres:postgres@localhost:5432/icapt',
+        conn_max_age=600
+    )
 }
+
+# For Render.com specifically - ensure it always uses their database URL
+if os.environ.get('RENDER'):
+    DATABASES['default'] = dj_database_url.config(
+        conn_max_age=600,
+        # This will use RENDER's DATABASE_URL automatically
+    )
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
