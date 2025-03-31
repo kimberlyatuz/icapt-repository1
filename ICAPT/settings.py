@@ -28,7 +28,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("Debug", "False").lower() == "true"
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost").split(" ")
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split(" ")
 
 # Session/Cookie settings (important for login)
 SESSION_COOKIE_SECURE = True
@@ -63,8 +63,8 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -103,18 +103,16 @@ WSGI_APPLICATION = 'ICAPT.wsgi.application'
 
 
 # Database
-database_url = os.environ.get("DATABASE_URL")
-print("Database URL:", repr(database_url)) # Debugging line
-# DATABASES["default"] = dj_database_url.parse(database_url)
-
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
     'default': dj_database_url.config(
-        default='',
+        default='postgresql://postgres:postgres@localhost:5432/icapt',
         conn_max_age=600
     )
 }
+database_url = os.environ.get("DATABASE_URL")
+DATABASES["default"] = dj_database_url.parse(database_url)
 
 
 # Password validation
@@ -138,20 +136,6 @@ AUTH_PASSWORD_VALIDATORS = [
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',  # Must be present for proper jazzzmin authentication
 ]
-
-
-STATIC_URL = '/static/'
-
-# TO CONNECT THE STATIC FILE
-# Additional directories to look for static2 files during development
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-    os.path.join(BASE_DIR, 'app1/static'),
-]
-# FOR THEN DEPLOYING APP TO A REMOTE SERVER
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -181,10 +165,10 @@ JAZZMIN_SETTINGS = {
     # Title on the brand (19 chars max) (defaults to current_admin_site.site_header if absent or None)
     "site_brand": "ICAPT",
 
-    # Logo to use for your site, must be present in static2 files, used for brand on top left
+    # Logo to use for your site, must be present in static files, used for brand on top left
     # "site_logo": "books/img/logo.png",
 
-    # Logo to use for your site, must be present in static2 files, used for login form logo (defaults to site_logo)
+    # Logo to use for your site, must be present in static files, used for login form logo (defaults to site_logo)
     "login_logo": None,
 
     # Logo to use for login form in dark themes (defaults to login_logo)
@@ -300,7 +284,7 @@ JAZZMIN_SETTINGS = {
     #############
     # UI Tweaks #
     #############
-    # Relative paths to custom CSS/JS scripts (must be present in static2 files)
+    # Relative paths to custom CSS/JS scripts (must be present in static files)
     "custom_css": None,
     "custom_js": None,
     # Whether to link font from fonts.googleapis.com (use custom_css to supply font otherwise)
@@ -349,6 +333,17 @@ JAZZMIN_UI_TWEAKS = {
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
+STATIC_URL = '/static/'
+
+# TO CONNECT THE STATIC FILE
+# Additional directories to look for static files during development
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, 'app1/static'),
+]
+# FOR THEN DEPLOYING APP TO A REMOTE SERVER
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # settings.py
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
