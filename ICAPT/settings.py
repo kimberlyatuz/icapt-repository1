@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os, inspect
+import sys
 import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -98,13 +99,13 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'DJANGO2PROJECT.wsgi.application'
+WSGI_APPLICATION = 'ICAPT.wsgi.application'
 
 
 # Database
 database_url = os.environ.get("DATABASE_URL")
-print("Database URL:", repr(database_url)) # Debugging line
-# DATABASES["default"] = dj_database_url.parse(database_url)
+# print("Database URL:", repr(database_url)) # Debugging line
+DATABASES["default"] = dj_database_url.parse(database_url)
 
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
@@ -139,13 +140,13 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 
-STATIC_URL = '/static2/'
+STATIC_URL = '/static/'
 
 # TO CONNECT THE STATIC FILE
 # Additional directories to look for static2 files during development
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static2'),
-    os.path.join(BASE_DIR, 'app1/static2'),
+    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, 'app1/static'),
 ]
 # FOR THEN DEPLOYING APP TO A REMOTE SERVER
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
@@ -388,5 +389,4 @@ LOGIN_REDIRECT_URL = 'index'    # Redirect after successful login
 CSP_DEFAULT_SRC = ("'self'", "http://localhost:5003")
 CSP_FRAME_ANCESTORS = ("'self'", "http://localhost:5003")
 
-import sys
 sys.setrecursionlimit(1500)  # Increase the limit
