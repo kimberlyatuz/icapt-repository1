@@ -337,7 +337,7 @@ STATIC_URL = '/static/'
 # TO CONNECT THE STATIC FILE
 # Additional directories to look for static files during development
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'ICAPT/static'),
+    os.path.join(BASE_DIR, 'static'),
     os.path.join(BASE_DIR, 'app1/static'),
 ]
 # FOR THEN DEPLOYING APP TO A REMOTE SERVER
