@@ -71,6 +71,23 @@ from django.views.decorators.http import require_POST
 
 logger = logging.getLogger(__name__)
 # Create your views here.
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render, redirect
+
+# Public landing page
+def public_landing(request):
+    if request.user.is_authenticated:
+        return redirect_authenticated_user(request.user)
+    return render(request, 'app1/public_landing.html')
+
+# Helper function to redirect logged-in users
+def redirect_authenticated_user(user):
+    if user.groups.filter(name='admin').exists():
+        return redirect('/admin/')  # Goes to Django admin
+    return redirect('index')  # Goes to staff first page
+
+# Login view
+@unauthenticated_user
 def loginpage(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -79,23 +96,12 @@ def loginpage(request):
         
         if user is not None:
             login(request, user)
-            next_url = request.POST.get('next') or request.GET.get('next')
-            
-            # Check groups and redirect appropriately
-            if user.groups.filter(name='admin').exists():
-                return redirect(next_url if next_url else 'admin:index')
-            elif user.groups.filter(name='staff').exists():
-                return redirect(next_url if next_url else 'index') 
+            return redirect_authenticated_user(user)
         else:
-            messages.error(request, 'Username/Password is incorrect')
+            messages.error(request, 'Invalid credentials')
+    
+    return render(request, 'accounts/login.html')
 
-    context = {'next': request.GET.get('next', '')}
-    return render(request, 'accounts/login.html', context)
-    
-    #  to context if present in GET
-    context = {'next': request.GET.get('next', '')}
-    return render(request, 'accounts/login.html', context)
-    
 def logoutuser(request):
     logout(request)
     return redirect('login')
