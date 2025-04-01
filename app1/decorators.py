@@ -2,11 +2,14 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 
 def unauthenticated_user(view_func):
-    def wrapper_func(request,*args,**kwargs):
+    @wraps(view_func)
+    def wrapper_func(request, *args, **kwargs):
         if request.user.is_authenticated:
-            return redirect('index')
-        else:
-            return view_func(request,*args,**kwargs)
+            # Redirect authenticated users based on their group
+            if request.user.groups.filter(name='admin').exists():
+                return redirect('/admin/')
+            return redirect('index')  # Or your staff dashboard URL
+        return view_func(request, *args, **kwargs)
     return wrapper_func
 
 # role based permission and authentication
