@@ -96,11 +96,17 @@ def loginpage(request):
         
         if user is not None:
             login(request, user)
-            return redirect_authenticated_user(user)
-        else:
-            messages.error(request, 'Invalid credentials')
-    
-    return render(request, 'accounts/login.html')
+            next_url = request.POST.get('next')
+            
+            # Validate next_url to prevent open redirects
+            if next_url and is_safe_url(next_url, allowed_hosts=request.get_host()):
+                return redirect(next_url)
+            
+            # Default redirects based on group
+            if user.groups.filter(name='admin').exists():
+                return redirect('/admin/')
+            return redirect('index') 
+            
 
 def logoutuser(request):
     logout(request)
