@@ -1,4 +1,5 @@
 # for logging in and registering
+from django.utils.http import is_safe_url
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
@@ -98,14 +99,20 @@ def loginpage(request):
             login(request, user)
             next_url = request.POST.get('next')
             
-            # Validate next_url to prevent open redirects
+            # Safe URL check
             if next_url and is_safe_url(next_url, allowed_hosts=request.get_host()):
                 return redirect(next_url)
             
-            # Default redirects based on group
+            # Group-based redirect
             if user.groups.filter(name='admin').exists():
                 return redirect('/admin/')
-            return redirect('index') 
+            return redirect('index')  # Staff users go to index
+            
+        else:
+            messages.error(request, 'Invalid username or password')
+    
+    # Always return a response for GET requests
+    return render(request, 'accounts/login.html')
             
 
 def logoutuser(request):
