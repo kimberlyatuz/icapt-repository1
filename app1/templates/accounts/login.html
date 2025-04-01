@@ -123,29 +123,67 @@
                     <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-navy-800 rounded-2xl opacity-20 blur-sm"></div>
                     <div class="relative">
                         <h3 class="text-2xl font-bold text-gray-800 mb-6">Sign In to ICAPT</h3>
-                        <form method="POST" action="{% url 'login' %}">
-                            {% csrf_token %}
-                            <div class="mb-4">
-                                <label class="block text-gray-700 mb-2 font-medium" for="username">Username</label>
-                                <input class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 glass-card"
-                                       id="username" name="username" type="text" placeholder="Username..."/>
-                            </div>
-                            <div class="mb-6">
-                                <label class="block text-gray-700 mb-2 font-medium" for="password">Password</label>
-                                <input class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 glass-card"
-                                       id="password" name="password" type="password" placeholder="••••••••"/>
-                            </div>
-                            <div class="flex items-center justify-between mb-6">
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600 rounded"/>
-                                    <span class="ml-2 text-gray-700">Remember me</span>
-                                </label>
-                                <a href="{% url 'forgot_password' %}" class="text-blue-600 hover:underline text-sm">Forgot password?</a>
-                            </div>
-                            <button class="w-full btn-primary text-white py-3 px-4 rounded-lg font-medium">
-                                Login <i class="fas fa-sign-in-alt ml-2"></i>
-                            </button>
-                        </form>
+                        <form method="POST" action="{% url 'login' %}" class="space-y-4">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+    
+    <!-- Error Messages -->
+    {% if messages %}
+    <div class="p-4 mb-4 bg-red-100 border border-red-400 text-red-700 rounded">
+        {% for message in messages %}
+        <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- Username Field -->
+    <div class="mb-4">
+        <label class="block text-gray-700 mb-2 font-medium" for="username">
+            Username
+        </label>
+        <input 
+            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 {% if form.username.errors %}border-red-500{% endif %}" 
+            id="username" 
+            name="username" 
+            type="text" 
+            required
+            placeholder="Username..."
+            value="{{ form.username.value|default:'' }}"
+        >
+    </div>
+    
+    <!-- Password Field -->
+    <div class="mb-6">
+        <label class="block text-gray-700 mb-2 font-medium" for="password">
+            Password
+        </label>
+        <input 
+            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 {% if form.password.errors %}border-red-500{% endif %}" 
+            id="password" 
+            name="password" 
+            type="password" 
+            required
+            placeholder="••••••••"
+        >
+    </div>
+    
+    <!-- Remember Me & Forgot Password -->
+    <div class="flex items-center justify-between mb-6">
+        <label class="flex items-center">
+            <input type="checkbox" name="remember_me" class="form-checkbox h-4 w-4 text-blue-600 rounded">
+            <span class="ml-2 text-gray-700">Remember me</span>
+        </label>
+        <a href="{% url 'forgot_password' %}" class="text-blue-600 hover:underline text-sm">
+            Forgot password?
+        </a>
+    </div>
+    
+    <!-- Submit Button -->
+    <button type="submit" class="w-full btn-primary text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors">
+        Login <i class="fas fa-sign-in-alt ml-2"></i>
+    </button>
+</form>
+			    
                         <div class="mt-6 text-center">
                             <p class="text-gray-600">Don't have an account? <a href="{% url 'register' %}" class="text-blue-600 font-medium hover:underline">Sign up</a></p>
                         </div>
