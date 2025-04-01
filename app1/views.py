@@ -73,25 +73,26 @@ logger = logging.getLogger(__name__)
 # Create your views here.
 @unauthenticated_user
 def loginpage(request):
-    #if request.user.is_authenticated:
-        #return redirect('index')
-    #else: commented out because now we use the decortor instead
-        if request.method =='POST':
-            username = request.POST.get('username')
-            password = request.POST.get('password')
-            user= authenticate(request, username=username, password=password)
-            if user is not None:
-                login(request, user)
-                # check if user is admin or staff
-                if user.groups.filter(name='admin').exists():
-                 return redirect('admin:index') #direct to the dashboard
-                else:
-                 return redirect('index') #direct to the homepage
-            else:
-                messages.info(request,'Username/Password is incorrect')
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            login(request, user)
+            next_url = request.POST.get('next') or request.GET.get('next')
+            
+            # Check groups and redirect
+            if user.groups.filter(name='admin').exists():
+                return redirect(next_url if next_url else 'admin:index')
+            return redirect(next_url if next_url else 'index')
+        else:
+            messages.error(request, 'Username/Password is incorrect')
 
-        context = {}
-        return render(request, 'accounts/login.html', context)
+    # Add next parameter to context if present in GET
+    context = {'next': request.GET.get('next', '')}
+    return render(request, 'accounts/login.html', context)
+    
 
 def logoutuser(request):
     logout(request)
