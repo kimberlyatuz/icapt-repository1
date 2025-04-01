@@ -192,3 +192,12 @@ JAZZMIN_UI_TWEAKS = {
 
 # Increase recursion limit
 sys.setrecursionlimit(1500)
+
+LOGIN_URL = '/login/'  # Customize if using different URL
+LOGIN_REDIRECT_URL = '/'  # Default redirect after login
+LOGOUT_REDIRECT_URL = '/login/'
+
+# Session settings to prevent loops
+SESSION_COOKIE_AGE = 3600  # 1 hour
+SESSION_SAVE_EVERY_REQUEST = True
+
