@@ -71,9 +71,6 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.onrender.com',
 ]
 
-# Ensure HTTPS is detected (for Render.com)
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
 ROOT_URLCONF = 'ICAPT.urls'
 
 TEMPLATES = [
@@ -163,7 +160,6 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 ACCOUNT_ACTIVATION_DAYS = 7
 REGISTRATION_AUTO_LOGIN = True
 SITE_ID = 1
-LOGIN_REDIRECT_URL = '/'
 
 # Import-export settings
 IMPORT_EXPORT_USE_TRANSACTIONS = True
