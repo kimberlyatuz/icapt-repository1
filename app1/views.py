@@ -100,18 +100,21 @@ def loginpage(request):
             next_url = request.POST.get('next')
             
             # Safe URL check
-            if next_url and is_safe_url(next_url, allowed_hosts=request.get_host()):
+            if next_url and url_has_allowed_host_and_scheme(
+                url=next_url,
+                allowed_hosts={request.get_host()},
+                require_https=request.is_secure()
+            ):
                 return redirect(next_url)
             
             # Group-based redirect
             if user.groups.filter(name='admin').exists():
                 return redirect('/admin/')
-            return redirect('index')  # Staff users go to index
+            return redirect('index')
             
         else:
             messages.error(request, 'Invalid username or password')
     
-    # Always return a response for GET requests
     return render(request, 'accounts/login.html')
             
 
