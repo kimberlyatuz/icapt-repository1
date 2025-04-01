@@ -4,7 +4,6 @@ from .views import review_submissions, ReviewRecords, \
     import_data, edit_submission, dashboard, submissions_list, user_submissions, update_submission, \
     bulk_accept_submissions, bulk_reject_submissions, unauthorized, ME_Dashboard,bulk_delete, get_patient_by_referral, patient_search
 
-
 urlpatterns = [
     # user's side
     path('', views.public_landing, name='landing'),  # NEW - public page
