@@ -82,12 +82,19 @@ def loginpage(request):
             login(request, user)
             next_url = request.POST.get('next') or request.GET.get('next')
             
-            # Check groups and redirect
+            # Check groups and redirect appropriately
             if user.groups.filter(name='admin').exists():
                 return redirect(next_url if next_url else 'admin:index')
-            return redirect(next_url if next_url else 'index')
+            elif user.groups.filter(name='staff').exists():
+                return redirect(next_url if next_url else 'dashboard')  # Changed from 'index'
+            else:
+                return redirect(next_url if next_url else 'me_dashboard')  # For regular users
         else:
             messages.error(request, 'Username/Password is incorrect')
+
+    context = {'next': request.GET.get('next', '')}
+    return render(request, 'accounts/login.html', context)
+    
 
     # Add next parameter to context if present in GET
     context = {'next': request.GET.get('next', '')}
@@ -125,6 +132,8 @@ def unauthorized(request):
 @login_required(login_url='login')
 @user_passes_test(lambda u: u.groups.filter(name='staff').exists(), login_url='login')
 def index(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
     # Get all submissions (or adjust query as needed)
     submissions = FormSubmission.objects.all()
 
