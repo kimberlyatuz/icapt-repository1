@@ -71,7 +71,6 @@ from django.views.decorators.http import require_POST
 
 logger = logging.getLogger(__name__)
 # Create your views here.
-@unauthenticated_user
 def loginpage(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -86,26 +85,20 @@ def loginpage(request):
             if user.groups.filter(name='admin').exists():
                 return redirect(next_url if next_url else 'admin:index')
             elif user.groups.filter(name='staff').exists():
-                return redirect(next_url if next_url else 'dashboard')  # Changed from 'index'
-            else:
-                return redirect(next_url if next_url else 'me_dashboard')  # For regular users
+                return redirect(next_url if next_url else 'index') 
         else:
             messages.error(request, 'Username/Password is incorrect')
 
     context = {'next': request.GET.get('next', '')}
     return render(request, 'accounts/login.html', context)
     
-
-    # Add next parameter to context if present in GET
+    #  to context if present in GET
     context = {'next': request.GET.get('next', '')}
     return render(request, 'accounts/login.html', context)
     
-
 def logoutuser(request):
     logout(request)
     return redirect('login')
-
-
 
 @unauthenticated_user
 def register(request):
