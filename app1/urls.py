@@ -3,20 +3,22 @@ from . import views
 from .views import review_submissions, ReviewRecords, \
     import_data, edit_submission, dashboard, submissions_list, user_submissions, update_submission, \
     bulk_accept_submissions, bulk_reject_submissions, unauthorized, ME_Dashboard,bulk_delete, get_patient_by_referral, patient_search
-#from Landing_page import views as landing_views
-#app_name = 'app2'
+
 
 urlpatterns = [
     # user's side
-    path('', views.index, name='index'),
-    path('login', views.loginpage, name='login'),
+    path('', views.public_landing, name='landing'),  # NEW - public page
+    path('home/', views.index, name='index'),  # Staff first page
+    path('register', views.register, name='register'),
+    # path('admin-dashboard/', views.admin_index, name='admin_index'),  # Admin dashboard
+    path('login/', views.loginpage, name='login'),
+    path('logout', views.logoutuser, name='logout'),
     path('forgot_password', views.export_data, name='forgot_password'),
     path('reset_password', views.export_data, name='reset_password'),
-    path('export_data', views.export_data, name='export_data'),
+    
     path('unauthorized/', unauthorized, name='unauthorized'),
-    path('logout', views.logoutuser, name='logout'),
-    path('register', views.register, name='register'),
     path('me_dashboard/', ME_Dashboard, name='me_dashboard'),
+    
     # staff dashboard
     path('dashboard/', dashboard, name='dashboard'),
 
@@ -44,6 +46,7 @@ urlpatterns = [
     path('user/<int:user_id>/submissions/', views.review_submissions, name='review_submissions'),
 
     #for exporting forms
+    path('export_data', views.export_data, name='export_data'),
     path('Submissions/', views.submissions, name='Submissions'),
     path('submissions/edit/<int:submission_id>/', edit_submission, name='edit_submission'),
    # for imports
