@@ -1,5 +1,4 @@
 # for logging in and registering
-from django.utils.http import url_has_allowed_host_and_scheme
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
@@ -72,43 +71,33 @@ from django.views.decorators.http import require_POST
 
 logger = logging.getLogger(__name__)
 # Create your views here.
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import render, redirect
-
-# Login view
 @unauthenticated_user
 def loginpage(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
-        
-        if user is not None:
-            login(request, user)
-            next_url = request.POST.get('next')
-            
-            # Safe URL check
-            if next_url and url_has_allowed_host_and_scheme(
-                url=next_url,
-                allowed_hosts={request.get_host()},
-                require_https=request.is_secure()
-            ):
-                return redirect(next_url)
-            
-            # Group-based redirect
-            if user.groups.filter(name='admin').exists():
-                return redirect('/admin/')
-            return redirect('index')
-            
-        else:
-            messages.error(request, 'Invalid username or password')
-    
-    return render(request, 'accounts/login.html')
-            
+    #if request.user.is_authenticated:
+        #return redirect('index')
+    #else: commented out because now we use the decortor instead
+        if request.method =='POST':
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+            user= authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                # check if user is admin or staff
+                if user.groups.filter(name='admin').exists():
+                 return redirect('admin:index') #direct to the dashboard
+                else:
+                 return redirect('index') #direct to the homepage
+            else:
+                messages.info(request,'Username/Password is incorrect')
+
+        context = {}
+        return render(request, 'accounts/login.html', context)
 
 def logoutuser(request):
     logout(request)
     return redirect('login')
+
+
 
 @unauthenticated_user
 def register(request):
@@ -135,8 +124,6 @@ def unauthorized(request):
 @login_required(login_url='login')
 @user_passes_test(lambda u: u.groups.filter(name='staff').exists(), login_url='login')
 def index(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
     # Get all submissions (or adjust query as needed)
     submissions = FormSubmission.objects.all()
 
