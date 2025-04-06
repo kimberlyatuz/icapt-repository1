@@ -1,17 +1,41 @@
 from django.http import HttpResponse
-from functools import wraps
 from django.shortcuts import redirect
+from django.contrib.auth.decorators import user_passes_test
 
 def unauthenticated_user(view_func):
-    @wraps(view_func)
+    def wrapper_func(request,*args,**kwargs):
+        if request.user.is_authenticated:
+            return redirect('index')
+        else:
+            return view_func(request,*args,**kwargs)
+    return wrapper_func
+
+def unauthenticated_user(view_func):
     def wrapper_func(request, *args, **kwargs):
         if request.user.is_authenticated:
-            # Redirect authenticated users based on their group
-            if request.user.groups.filter(name='admin').exists():
-                return redirect('/admin/')
-            return redirect('index')  # Or your staff dashboard URL
-        return view_func(request, *args, **kwargs)
+            return redirect('index')
+        else:
+            return view_func(request, *args, **kwargs)
     return wrapper_func
+
+def staff_required(view_func):
+    def wrapper_func(request, *args, **kwargs):
+        if request.user.is_staff or request.user.is_superuser:
+            return view_func(request, *args, **kwargs)
+        else:
+            messages.error(request, "You don't have permission to access this page")
+            return redirect('unauthorized')
+    return wrapper_func
+
+def admin_required(view_func):
+    def wrapper_func(request, *args, **kwargs):
+        if request.user.is_superuser or request.user.groups.filter(name='admin').exists():
+            return view_func(request, *args, **kwargs)
+        else:
+            messages.error(request, "Admin access required")
+            return redirect('unauthorized')
+    return wrapper_func
+
 
 # role based permission and authentication
 def allowed_users(allowed_roles = []):
