@@ -11,45 +11,60 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-import os
-import sys
+import os, inspect
 import dj_database_url
+import sys
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
 # Quick-start development settings - unsuitable for production
-SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-default-key-for-dev-only")
+# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+# Security settings
+# SECURITY WARNING: don't run with debug turned on in production!
+# DEBUG = True
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-key-only-for-local')
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+ALLOWED_HOSTS = []
+if not DEBUG:
+    ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
+else:
+    ALLOWED_HOSTS.extend(['localhost', '127.0.0.1'])
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "icapt11.onrender.com").split(" ")
-
-# Custom authentication settings
-AUTH_GROUPS = {
-    'STAFF': 'staff',
-    'ADMIN': 'admin',
-    'ME': 'me',
+# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+# Database
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
-LOGIN_URL = 'landing' 
-LOGIN_REDIRECT_URL = 'index'  # New router view
-LOGOUT_REDIRECT_URL = 'landing'
 
-# Session/Cookie settings
-SESSION_COOKIE_SECURE = not DEBUG  # Only secure in production
-CSRF_COOKIE_SECURE = not DEBUG     # Only secure in production
-SESSION_COOKIE_AGE = 3600  # 1 hour
-SESSION_SAVE_EVERY_REQUEST = True
+# Override with Render's DATABASE_URL if available
+if 'DATABASE_URL' in os.environ:
+    DATABASES['default'] = dj_database_url.config(
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+
+# Security settings
+SESSION_COOKIE_SECURE = not DEBUG  # True in production
+CSRF_COOKIE_SECURE = not DEBUG    # True in production
+SECURE_SSL_REDIRECT = not DEBUG   # True in production
 
 # Application definition
-INSTALLED_APPS = [
+
+INSTALLED_APPS = (
     'django.contrib.auth',
     'registration',
     'jazzmin',
     'django.contrib.admin',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.sites',
+    'django.contrib.sites',   #added for the jazzmin dashboard
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'app1',
@@ -59,11 +74,25 @@ INSTALLED_APPS = [
     'accounts',
     'import_export',
     'django_tables2',
-]
 
+)
+
+#CRISPY_TEMPLATE_PACK = 'bootstrap4'
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
+# Add these to your settings.py
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'  # For staff users
+STAFF_LOGIN_REDIRECT_URL = '/login/' # for staff
+ADMIN_LOGIN_REDIRECT_URL = '/admin/'  # For superusers
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+# Middleware order is crucial
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -71,27 +100,24 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'app1.middleware.AuthMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.locale.LocaleMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',    
 ]
-
-X_FRAME_OPTIONS = 'SAMEORIGIN'
-# Allow Render.com's domain in CSRF trusted origins
-CSRF_TRUSTED_ORIGINS = [
-    'https://icapt11.onrender.com',
-    'https://*.onrender.com',
-]
+X_FRAME_OPTIONS = 'ALLOWALL'
 
 ROOT_URLCONF = 'ICAPT.urls'
+
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             os.path.join(BASE_DIR, 'templates'),
+            os.path.join(BASE_DIR, 'crispy_bootstrap5/templates'),
+            os.path.join(BASE_DIR, 'crispy_bootstrap5/templates/layout'),
         ],
+
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -106,23 +132,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ICAPT.wsgi.application'
 
-# Database configuration - Updated for Render.com
-DATABASES = {
-    'default': dj_database_url.config(
-        # Fallback to SQLite for local development if no DATABASE_URL
-        default='sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3'),
-        conn_max_age=600
-    )
-}
-
-# For Render.com specifically - alternative approach
-if os.environ.get('RENDER'):
-    DATABASES['default'] = dj_database_url.config(
-        conn_max_age=600,
-        # ssl_require=True  # Important for Render.com's PostgreSQL
-    )
-
 # Password validation
+# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -139,60 +151,27 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
+    'django.contrib.auth.backends.ModelBackend',  # Must be present for proper jazzzmin authentication
 ]
 
 # Internationalization
+# https://docs.djangoproject.com/en/5.1/topics/i18n/
+
 LANGUAGE_CODE = 'en-us'
+
 TIME_ZONE = 'UTC'
+
 USE_I18N = True
+
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-    os.path.join(BASE_DIR, 'app1/static'),
-]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Default primary key field type
+# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
-# Email settings
-EMAIL_BACKEND = os.environ.get(
-    'EMAIL_BACKEND',
-    'django.core.mail.backends.smtp.EmailBackend' if not DEBUG else 'django.core.mail.backends.console.EmailBackend'
-)
-EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
-EMAIL_PORT = os.environ.get('EMAIL_PORT', 587)
-EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Registration settings
-ACCOUNT_ACTIVATION_DAYS = 7
-REGISTRATION_AUTO_LOGIN = True
-SITE_ID = 1
 
-# Import-export settings
-IMPORT_EXPORT_USE_TRANSACTIONS = True
-
-DYNAMIC_DATATB = {
-    'forms': "app1.models.UserForm",
-    'formsub': "app1.models.FormSubmission",
-}
-
-# Security settings
-if not DEBUG:
-    SECURE_HSTS_SECONDS = 3600
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
-    SECURE_SSL_REDIRECT = True
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-# Jazzmin settings (unchanged from your original)
 JAZZMIN_SETTINGS = {
     # title of the window (Will default to current_admin_site.site_title if absent or None)
     "site_title": "",
@@ -367,7 +346,73 @@ JAZZMIN_UI_TWEAKS = {
     }
 }
 
-# Increase recursion limit
-sys.setrecursionlimit(1500)
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.1/howto/static-files/
+
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
+# Add Whitenoise middleware for production
+if 'DATABASE_URL' in os.environ:  # Detect production environment
+    MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Email configuration (using environment variables)
+EMAIL_BACKEND = os.environ.get(
+    'EMAIL_BACKEND',
+    'django.core.mail.backends.console.EmailBackend' if DEBUG else 'django.core.mail.backends.smtp.EmailBackend'
+)
+EMAIL_HOST = os.environ.get('EMAIL_HOST', '')
+EMAIL_PORT = os.environ.get('EMAIL_PORT', '')
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+
+# Production security settings
+if not DEBUG:
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+ACCOUNT_ACTIVATION_DAYS = 7
+REGISTRATION_AUTO_LOGIN = True #TO AUTOMATICALLY LOGIN ONCE YOU ARE A USER
+SITE_ID = 1
+
+IMPORT_EXPORT_USE_TRANSACTIONS = True
+
+DYNAMIC_DATATB = {
+    'forms' : "app1.models.UserForm",
+    'formsub':"app1.models.FormSubmission",
+}
+
+LANGUAGE_CODE = 'en-us'
+USE_I18N = True
+
+LANGUAGES = [
+    ('en', 'English'),
+]
+
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale'),
+]
+
+
+CSP_DEFAULT_SRC = ("'self'", "http://localhost:5003")
+CSP_FRAME_ANCESTORS = ("'self'", "http://localhost:5003")
+
+sys.setrecursionlimit(1500)  # Increase the limit
+
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
