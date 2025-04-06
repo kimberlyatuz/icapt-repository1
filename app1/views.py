@@ -75,18 +75,6 @@ logger = logging.getLogger(__name__)
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect
 
-# Public landing page
-def public_landing(request):
-    if request.user.is_authenticated:
-        return redirect_authenticated_user(request.user)
-    return render(request, 'app1/public_landing.html')
-
-# Helper function to redirect logged-in users
-def redirect_authenticated_user(user):
-    if user.groups.filter(name='admin').exists():
-        return redirect('/admin/')  # Goes to Django admin
-    return redirect('index')  # Goes to staff first page
-
 # Login view
 @unauthenticated_user
 def loginpage(request):
