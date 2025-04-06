@@ -71,35 +71,34 @@ from django.views.decorators.http import require_POST
 
 logger = logging.getLogger(__name__)
 # Create your views here.
-@unauthenticated_user
 def loginpage(request):
-    #if request.user.is_authenticated:
-        #return redirect('index')
-    #else: commented out because now we use the decortor instead
-        if request.method =='POST':
-            username = request.POST.get('username')
-            password = request.POST.get('password')
-            user= authenticate(request, username=username, password=password)
-            if user is not None:
-                login(request, user)
-                # check if user is admin or staff
-                if user.groups.filter(name='admin').exists():
-                 return redirect('admin:index') #direct to the dashboard
-                else:
-                 return redirect('index') #direct to the homepage
-            else:
-                messages.info(request,'Username/Password is incorrect')
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
 
-        context = {}
-        return render(request, 'accounts/login.html', context)
+        if user is not None:
+            login(request, user)
+            # Get the 'next' parameter if it exists
+            next_url = request.POST.get('next') or request.GET.get('next')
+
+            # Handle redirects based on user type
+            if user.is_superuser:
+                return redirect(next_url or 'admin:index')
+            else:
+                return redirect(next_url or 'index')
+        else:
+            messages.error(request, 'Invalid username or password')
+
+    # Add next parameter to context if it exists in GET
+    context = {'next': request.GET.get('next', '')}
+    return render(request, 'accounts/login.html', context)
+
 
 def logoutuser(request):
     logout(request)
     return redirect('login')
 
-
-
-@unauthenticated_user
 def register(request):
     #add the built in django form for registration
     form = CreateUserForm()
@@ -122,7 +121,7 @@ def unauthorized(request):
 
 
 @login_required(login_url='login')
-@user_passes_test(lambda u: u.groups.filter(name='staff').exists(), login_url='login')
+# @user_passes_test(lambda u: u.groups.filter(name='staff').exists(), login_url='login')
 def index(request):
     # Get all submissions (or adjust query as needed)
     submissions = FormSubmission.objects.all()
