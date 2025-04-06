@@ -28,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # DEBUG = True
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-key-only-for-local')
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['icapt11.onrender.com']
 if not DEBUG:
     ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 else:
