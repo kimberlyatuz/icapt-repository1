@@ -1,4 +1,4 @@
-
+# Updated middleware.py
 from django.shortcuts import redirect
 from django.conf import settings
 
@@ -11,11 +11,18 @@ class GroupAuthMiddleware:
         return response
 
     def process_view(self, request, view_func, view_args, view_kwargs):
-        # Skip middleware for these paths
-        if request.path in ['/login/', '/logout/', '/register/', '/']:
+        # Paths that don't require authentication
+        public_paths = [
+            '/', '/login/', '/logout/', 
+            '/register/', '/unauthorized/'
+        ]
+        
+        if request.path in public_paths:
             return None
             
         if request.user.is_authenticated:
             if not request.user.groups.exists():
                 return redirect('unauthorized')
+        else:
+            return redirect('landing')
         return None
