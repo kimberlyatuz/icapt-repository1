@@ -71,23 +71,34 @@ from django.views.decorators.http import require_POST
 
 logger = logging.getLogger(__name__)
 # Create your views here.
+@unauthenticated_user
 def loginpage(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
+        
         if user is not None:
             login(request, user)
-            # check if user is admin or staff
-            if user.groups.filter(name='admin').exists():
-                return redirect('admin:index')  # direct to the dashboard
-            else:
-                return redirect('index')  # direct to the homepage
+            # Always route through the post_login_router
+            return redirect('post_login_router')
         else:
             messages.info(request, 'Username/Password is incorrect')
+    
+    # GET request shows your beautiful login/landing page
+    return render(request, 'accounts/login.html')
 
-    context = {}
-    return render(request, 'accounts/login.html', context)
+@login_required
+def post_login_router(request):
+    """Route users to their appropriate dashboard after login"""
+    if request.user.groups.filter(name='admin').exists():
+        return redirect('admin:index')  # Django admin
+    elif request.user.groups.filter(name='staff').exists():
+        return redirect('dashboard')
+    elif request.user.groups.filter(name='me').exists():
+        return redirect('me_dashboard')
+    return redirect('unauthorized')
+    
 
 def logoutuser(request):
     logout(request)
