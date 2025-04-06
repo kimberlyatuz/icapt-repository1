@@ -8,7 +8,7 @@ urlpatterns = [
     # user's side
     # Main entry point (your beautiful login/landing page)
     path('', views.loginpage, name='landing'),  # This shows your login /marketing page
-    
+    path('index/', views.index, name='index'),
     # Authentication paths
     path('login/', views.loginpage, name='login'),  # Can also point here directly
     path('register/', views.register, name='register'),
