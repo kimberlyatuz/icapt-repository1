@@ -71,33 +71,27 @@ from django.views.decorators.http import require_POST
 
 logger = logging.getLogger(__name__)
 # Create your views here.
-@unauthenticated_user
 def loginpage(request):
-    #if request.user.is_authenticated:
-        #return redirect('index')
-    #else: commented out because now we use the decortor instead
-        if request.method =='POST':
-            username = request.POST.get('username')
-            password = request.POST.get('password')
-            user= authenticate(request, username=username, password=password)
-            if user is not None:
-                login(request, user)
-                # check if user is admin or staff
-                if user.groups.filter(name='admin').exists():
-                 return redirect('admin:index') #direct to the dashboard
-                else:
-                 return redirect('index') #direct to the homepage
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            # check if user is admin or staff
+            if user.groups.filter(name='admin').exists():
+                return redirect('admin:index')  # direct to the dashboard
             else:
-                messages.info(request,'Username/Password is incorrect')
+                return redirect('index')  # direct to the homepage
+        else:
+            messages.info(request, 'Username/Password is incorrect')
 
-        context = {}
-        return render(request, 'accounts/login.html', context)
+    context = {}
+    return render(request, 'accounts/login.html', context)
 
 def logoutuser(request):
     logout(request)
     return redirect('login')
-
-
 
 @unauthenticated_user
 def register(request):
@@ -122,8 +116,11 @@ def unauthorized(request):
 
 
 @login_required(login_url='login')
-@user_passes_test(lambda u: u.groups.filter(name='staff').exists(), login_url='login')
 def index(request):
+    # Check group membership more gracefully
+    if not request.user.groups.filter(name='staff').exists():
+        # Redirect to appropriate page or show unauthorized message
+        return redirect('unauthorized')
     # Get all submissions (or adjust query as needed)
     submissions = FormSubmission.objects.all()
 
