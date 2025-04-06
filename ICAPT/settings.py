@@ -31,9 +31,9 @@ AUTH_GROUPS = {
     'ADMIN': 'admin',
     'ME': 'me',
 }
-LOGIN_URL = 'landing'  # Points to your root URL (login/landing page)
-LOGIN_REDIRECT_URL = 'post_login_router'  # New router view
-LOGOUT_REDIRECT_URL = 'landing'  # Redirects back to login/landing after logout
+LOGIN_URL = 'landing' 
+LOGIN_REDIRECT_URL = 'index'  # New router view
+LOGOUT_REDIRECT_URL = 'landing'
 
 # Session/Cookie settings
 SESSION_COOKIE_SECURE = not DEBUG  # Only secure in production
@@ -71,11 +71,10 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'app1.middleware.GroupAuthMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.locale.LocaleMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'app1.middleware.GroupAuthMiddleware',
-    
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',    
 ]
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
