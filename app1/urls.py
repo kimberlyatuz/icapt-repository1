@@ -6,20 +6,23 @@ from .views import review_submissions, ReviewRecords, \
 
 urlpatterns = [
     # user's side
-    path('', views.public_landing, name='landing'),  # NEW - public page
-    path('home/', views.index, name='index'),  # Staff first page
-    path('register', views.register, name='register'),
-    # path('admin-dashboard/', views.admin_index, name='admin_index'),  # Admin dashboard
-    path('login/', views.loginpage, name='login'),
-    path('logout', views.logoutuser, name='logout'),
+    # Main entry point (your beautiful login/landing page)
+    path('', views.loginpage, name='landing'),  # This shows your login /marketing page
+    
+    # Authentication paths
+    path('login/', views.loginpage, name='login'),  # Can also point here directly
+    path('register/', views.register, name='register'),
+    path('logout/', views.logoutuser, name='logout'),
     path('forgot_password', views.export_data, name='forgot_password'),
     path('reset_password', views.export_data, name='reset_password'),
-    
     path('unauthorized/', unauthorized, name='unauthorized'),
-    path('me_dashboard/', ME_Dashboard, name='me_dashboard'),
+    
+    # Post-login routing (protected views)
+    path('dashboard/', views.post_login_router, name='post_login_router'),  # New router view
+    path('me/dashboard/', ME_Dashboard, name='me_dashboard'),
     
     # staff dashboard
-    path('dashboard/', dashboard, name='dashboard'),
+    # path('dashboard/', dashboard, name='dashboard'),
 
     path('add_user/', views.add_user, name='add_user'),
     path('enter_data/', views.enter_data, name='enter_data'),
