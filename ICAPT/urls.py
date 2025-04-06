@@ -18,13 +18,13 @@ Including another URLconf
 from django.conf.urls.i18n import i18n_patterns
 from django.contrib import admin
 from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
+from django.views.generic.base import RedirectView
 
 urlpatterns = [
 # Override default login URL
-    path('accounts/', include('django.contrib.auth.urls')),  # Core auth URLs
     path('admin/', admin.site.urls),
+    path('accounts/', include('django.contrib.auth.urls')),
+    path('i18n/', include('django.conf.urls.i18n')),
 
     ]
 # Internationalized URLs (with language prefix)
@@ -34,7 +34,5 @@ urlpatterns += i18n_patterns(
 
     # Third-party packages that need translation
     path('accounts/', include('registration.backends.default.urls')),
+    path('', RedirectView.as_view(url='/en/', permanent=True)),
 )
-
-
-
