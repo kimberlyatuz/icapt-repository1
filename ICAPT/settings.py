@@ -74,7 +74,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'app1.middleware.GroupAuthMiddleware',
+    'app1.middleware.GroupAuthMiddleware',
     
 ]
 
