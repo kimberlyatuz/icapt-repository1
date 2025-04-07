@@ -64,10 +64,11 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.sites',   #added for the jazzmin dashboard
+    'django.contrib.sites',  
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'app1',
+    'material',
     'ME',
     'crispy_forms',
     'crispy_bootstrap5',
