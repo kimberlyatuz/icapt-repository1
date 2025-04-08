@@ -17,9 +17,18 @@
         }
 
         body {
-            background-color: #1e3a8a; /* Blue background */
             font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark {
+            background-color: #1e3a8a; /* Blue background */
             color: #f9fafb; /* Light text color */
+        }
+
+        body.light {
+            background-color: #f3f4f6;
+            color: #111827;
         }
 
         .card {
@@ -58,32 +67,67 @@
         .nav-link:hover:after {
             width: 100%;
         }
+
+        /* Theme toggle button styles */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 50px;
+            padding: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .theme-toggle i {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        body.light .theme-toggle i {
+            color: #4b5563;
+        }
     </style>
 
 </head>
-<!-- Main Content -->
+<body class="dark">
+    <!-- Theme Toggle Button -->
+    <div class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon" id="themeIcon"></i>
+    </div>
+
+    <!-- Main Content -->
     <div class="flex flex-col flex-1 overflow-hidden">
-
-
         <!-- Dashboard Content -->
-        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-900 p-6">
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-900 p-6 dark:bg-gray-100">
             <div class="mb-6">
-                <h1 class="text-3xl font-bold">Hi {{ user.username }}</h1>
-                <p class="text-gray-300"><i>Here's what's happening with your submissions today</i></p>
+                <h1 class="text-3xl font-bold dark:text-gray-900">Hi {{ user.username }}</h1>
+                <p class="text-gray-300 dark:text-gray-600"><i>Here's what's happening with your submissions today</i></p>
             </div>
 
             <!-- Stats Cards -->
             <div class="container">
                 <div class="grid gap-6 mb-8 md:grid-cols-3">
                     <!-- Total Submissions -->
-                    <div class="card stat-card bg-gray-800 rounded-lg p-6">
+                    <div class="card stat-card bg-gray-800 dark:bg-white rounded-lg p-6">
                         <div class="flex items-center">
                             <div class="p-3 rounded-full bg-blue-500 text-white">
                                 <i class="fas fa-file-alt text-xl"></i>
                             </div>
                             <div class="ml-4">
-                                <p class="text-sm font-medium">Total Submissions</p>
-                                <p class="text-2xl font-semibold">{{total_submissions}}</p>
+                                <p class="text-sm font-medium dark:text-gray-700">Total Submissions</p>
+                                <p class="text-2xl font-semibold dark:text-gray-900">{{total_submissions}}</p>
                             </div>
                         </div>
                         <div class="mt-4">
@@ -93,14 +137,14 @@
                     </div>
 
                     <!-- Accepted Submissions -->
-                    <div class="card stat-card bg-gray-800 rounded-lg p-6">
+                    <div class="card stat-card bg-gray-800 dark:bg-white rounded-lg p-6">
                         <div class="flex items-center">
                             <div class="p-3 rounded-full bg-green-500 text-white">
                                 <i class="fas fa-check-circle text-xl"></i>
                             </div>
                             <div class="ml-4">
-                                <p class="text-sm font-medium">Accepted Submissions</p>
-                                <p class="text-2xl font-semibold">{{accepted_submissions}}</p>
+                                <p class="text-sm font-medium dark:text-gray-700">Accepted Submissions</p>
+                                <p class="text-2xl font-semibold dark:text-gray-900">{{accepted_submissions}}</p>
                             </div>
                         </div>
                         <div class="mt-4">
@@ -110,13 +154,13 @@
                     </div>
 
                     <!-- Rejected Submissions -->
-                    <div class="card stat-card bg-gray-800 rounded-lg p-6">
+                    <div class="card stat-card bg-gray-800 dark:bg-white rounded-lg p-6">
                         <div class="flex items-center">
                             <div class="p-3 rounded-full bg-red-500 text-white">
                             </div>
                             <div class="ml-4">
-                                <p class="text-sm font-medium">Rejected Submissions</p>
-                                <p class="text-2xl font-semibold">{{rejected_submissions}}</p>
+                                <p class="text-sm font-medium dark:text-gray-700">Rejected Submissions</p>
+                                <p class="text-2xl font-semibold dark:text-gray-900">{{rejected_submissions}}</p>
                             </div>
                         </div>
                         <div class="mt-4">
@@ -127,9 +171,9 @@
                 </div>
 
                 <!-- Chart Section -->
-                <div class="card bg-gray-800 rounded-lg p-6 mb-8">
+                <div class="card bg-gray-800 dark:bg-white rounded-lg p-6 mb-8">
                     <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-                        <h2 class="text-xl font-semibold">Submissions Progress</h2>
+                        <h2 class="text-xl font-semibold dark:text-gray-900">Submissions Progress</h2>
                         <div class="inline-flex rounded-md shadow-sm mt-4 md:mt-0" role="group">
                             <a href="?granularity=day" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-500">
                                 Daily
@@ -153,8 +197,48 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Theme toggle functionality
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = document.getElementById('themeIcon');
+            const body = document.body;
+            
+            // Check for saved theme preference or use preferred color scheme
+            const savedTheme = localStorage.getItem('theme') || 
+                              (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+            
+            // Apply the saved theme
+            body.classList.add(savedTheme);
+            updateThemeIcon(savedTheme);
+            
+            // Toggle theme on button click
+            themeToggle.addEventListener('click', () => {
+                if (body.classList.contains('dark')) {
+                    body.classList.remove('dark');
+                    body.classList.add('light');
+                    localStorage.setItem('theme', 'light');
+                    updateThemeIcon('light');
+                } else {
+                    body.classList.remove('light');
+                    body.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                    updateThemeIcon('dark');
+                }
+                updateChartTheme();
+            });
+            
+            function updateThemeIcon(theme) {
+                if (theme === 'dark') {
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                } else {
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                }
+            }
+            
+            // Initialize chart
             const ctx = document.getElementById('myLineChart').getContext('2d');
-            const submissionChart = new Chart(ctx, {
+            let submissionChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: {{ labels|safe }},
@@ -173,7 +257,13 @@
                         pointHoverRadius: 6
                     }]
                 },
-                options: {
+                options: getChartOptions()
+            });
+            
+            function getChartOptions() {
+                const isDark = body.classList.contains('dark');
+                
+                return {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
@@ -181,7 +271,9 @@
                             display: false
                         },
                         tooltip: {
-                            backgroundColor: '#2d3748',
+                            backgroundColor: isDark ? '#2d3748' : '#ffffff',
+                            titleColor: isDark ? '#f9fafb' : '#111827',
+                            bodyColor: isDark ? '#f9fafb' : '#111827',
                             titleFont: {
                                 size: 14,
                                 weight: 'bold'
@@ -201,16 +293,16 @@
                             beginAtZero: true,
                             grid: {
                                 drawBorder: false,
-                                color: 'rgba(255, 255, 255, 0.1)'
+                                color: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
                             },
                             title: {
                                 display: true,
                                 text: 'Number of Submissions',
-                                color: '#f9fafb'
+                                color: isDark ? '#f9fafb' : '#111827'
                             },
                             ticks: {
                                 stepSize: 1,
-                                color: '#e2e8f0'
+                                color: isDark ? '#e2e8f0' : '#4b5563'
                             }
                         },
                         x: {
@@ -221,15 +313,40 @@
                             title: {
                                 display: true,
                                 text: 'Date',
-                                color: '#f9fafb'
+                                color: isDark ? '#f9fafb' : '#111827'
                             },
                             ticks: {
-                                color: '#e2e8f0'
+                                color: isDark ? '#e2e8f0' : '#4b5563'
                             }
                         }
                     }
-                }
-            });
+                };
+            }
+            
+            function updateChartTheme() {
+                submissionChart.destroy();
+                submissionChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: {{ labels|safe }},
+                        datasets: [{
+                            label: 'Submissions',
+                            data: {{ counts|safe }},
+                            borderColor: '#4fd1c5',
+                            backgroundColor: 'rgba(79, 209, 197, 0.2)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: body.classList.contains('dark') ? '#2d3748' : '#ffffff',
+                            pointBorderColor: '#4fd1c5',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: getChartOptions()
+                });
+            }
         });
     </script>
 </body>
