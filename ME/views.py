@@ -31,7 +31,7 @@ def patients_management(request):
 def users(request):
     return render(request, 'app1/admin_users_users.html')
 
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+# pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 def upload_and_extract(request):
     if request.method == "POST":
