@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text Extractor - Result</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        header, footer { background-color: darkblue; color: white; text-align: center; padding: 10px; }
+        .container { text-align: center; margin: 50px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Text Extractor</h1>
+    </header>
+    <div class="container">
+        <h2>Result</h2>
+        <img src="{{ image_entry.image.url }}" alt="Uploaded Image" width="300">
+        <p><strong>Extracted Text:</strong></p>
+        <p>{{ image_entry.extracted_text }}</p>
+    </div>
+    <footer>
+        Powered by <a href="https://yourchannel.com" style="color: white;">Your Channel</a>
+    </footer>
+</body>
+</html>
