@@ -1,5 +1,6 @@
 {% load custom_filters %}
-<!DOCTYPE html>
+{% load crispy_forms_tags %}
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -64,13 +65,156 @@
                     <option value="XLSX">XLSX</option>
                     <option value="JSON">JSON</option>
                 </select>
-            </div>
+          <p><a href="{% url 'upload' %}" class="link-primary">Want to upload image instead? </a></p>            </div>
             <div class="form-group mb-3">
                 <label for="importData" class="form-label">Upload File:</label>
                 <input type="file" class="form-control" id="importData" name="importData" required>
             </div>
             <button type="submit" class="btn btn-primary">Import</button>
         </form>
+
+        <div class="container">
+    <h2>{% if form.instance.pk %}Edit{% else %}Create{% endif %} Form Submission</h2>
+
+    <form method="post" enctype="multipart/form-data" id="submission-form">
+        {% csrf_token %}
+        {{ form.media }}
+        {{ form|crispy }}
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle document upload and OCR processing
+    const documentUpload = document.querySelector('#id_document_upload');
+    const ocrPreview = document.querySelector('#ocr-preview');
+    const extractedFields = document.querySelector('#extracted-fields');
+    const dataField = document.querySelector('#id_data');
+    const extractedDataJson = document.querySelector('#id_extracted_data_json');
+    const useExtractedBtn = document.querySelector('#use-extracted-data');
+
+    if (documentUpload) {
+        documentUpload.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                // Show loading state
+                ocrPreview.style.display = 'block';
+                extractedFields.innerHTML = '<p>Processing document... <i class="fas fa-spinner fa-spin"></i></p>';
+
+                // In a real app, you'd send this to the server for processing
+                // Here we'll simulate it with a timeout
+                setTimeout(function() {
+                    // This would normally come from the server response
+                    const formData = new FormData();
+                    formData.append('document', e.target.files[0]);
+                    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                    fetch('{% url "process_document" %}', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Display extracted fields
+                            let html = '<table class="table table-sm">';
+                            for (const [key, value] of Object.entries(data.extracted)) {
+                                html += `
+                                    <tr>
+                                        <td><strong>${key}</strong></td>
+                                        <td>${value}</td>
+                                    </tr>
+                                `;
+                            }
+                            html += '</table>';
+                            extractedFields.innerHTML = html;
+
+                            // Store the extracted data in the hidden field
+                            extractedDataJson.value = JSON.stringify(data.extracted);
+                        } else {
+                            extractedFields.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                        }
+                    })
+                    .catch(error => {
+                        extractedFields.innerHTML = `<div class="alert alert-danger">Error processing document</div>`;
+                        console.error('Error:', error);
+                    });
+                }, 1000);
+            }
+        });
+    }
+
+    // Handle using the extracted data
+    if (useExtractedBtn) {
+        useExtractedBtn.addEventListener('click', function() {
+            if (extractedDataJson.value) {
+                try {
+                    const data = JSON.parse(extractedDataJson.value);
+                    dataField.value = JSON.stringify(data, null, 2);
+
+                    // Highlight the fields that were auto-filled
+                    dataField.classList.add('bg-success', 'bg-opacity-10');
+                    setTimeout(() => {
+                        dataField.classList.remove('bg-success', 'bg-opacity-10');
+                    }, 3000);
+                } catch (e) {
+                    alert('Error applying extracted data');
+                }
+            }
+        });
+    }
+
+    // For ImportForm preview functionality
+    const imageUpload = document.querySelector('#id_image');
+    const previewSection = document.querySelector('#preview-section');
+    const dataPreview = document.querySelector('#data-preview');
+    const editBtn = document.querySelector('#edit-data');
+    const editSection = document.querySelector('#edit-section');
+    const dataEditor = document.querySelector('#data-editor');
+    const saveEditBtn = document.querySelector('#save-edit');
+    const extractedDataField = document.querySelector('#id_extracted_data');
+
+    if (imageUpload) {
+        imageUpload.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                // Show loading state
+                previewSection.style.display = 'block';
+                dataPreview.innerHTML = '<p>Processing image... <i class="fas fa-spinner fa-spin"></i></p>';
+
+                // Process the image (simulated)
+                setTimeout(function() {
+                    // In a real app, this would come from the server
+                    const sampleText = "Sample extracted text:\n\nName: John Doe\nAge: 35\nGender: Male\n\nThis would be replaced with actual OCR results from your server.";
+                    dataPreview.innerHTML = `<pre>${sampleText}</pre>`;
+                    dataEditor.value = sampleText;
+                    extractedDataField.value = sampleText;
+                }, 1500);
+            }
+        });
+    }
+
+    if (editBtn) {
+        editBtn.addEventListener('click', function() {
+            editSection.style.display = 'block';
+        });
+    }
+
+    if (saveEditBtn) {
+        saveEditBtn.addEventListener('click', function() {
+            const editedText = dataEditor.value;
+            dataPreview.innerHTML = `<pre>${editedText}</pre>`;
+            extractedDataField.value = editedText;
+            editSection.style.display = 'none';
+        });
+    }
+});
+</script>
+
+<style>
+/* Add some visual feedback for auto-filled fields */
+.bg-success {
+    transition: background-color 0.5s ease;
+}
+</style>
     </div>
 
     <!-- JavaScript at bottom -->
