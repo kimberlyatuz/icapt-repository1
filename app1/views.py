@@ -1295,3 +1295,12 @@ def save_patient_demographics(request):
         return JsonResponse({'success': 'Patient demographics saved successfully'})
     else:
         return JsonResponse({'error': 'Invalid request method'})
+
+# Add this temporary view
+def tesseract_check(request):
+    import subprocess
+    try:
+        result = subprocess.run(['which', 'tesseract'], capture_output=True)
+        return HttpResponse(f"Tesseract path: {result.stdout.decode()}")
+    except Exception as e:
+        return HttpResponse(f"Error: {str(e)}", status=500)
