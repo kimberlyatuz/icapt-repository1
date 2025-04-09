@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text Extractor</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        header, footer { background-color: darkblue; color: white; text-align: center; padding: 10px; }
+        .container { text-align: center; margin: 50px; }
+        .preview { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Text Extractor</h1>
+    </header>
+    <div class="container">
+        <h2>Upload an Image</h2>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Extract</button>
+        </form>
+    </div>
+    <footer>
+        ICAPT established @2025
+    </footer>
+</body>
+</html>
