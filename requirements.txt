@@ -44,13 +44,14 @@ packaging==24.2
 pandas==2.2.3
 path.py==12.5.0
 pickle-mixin==1.0.2
-pillow==11.1.0
+pytesseract==0.3.10
+Pillow==10.1.0
+opencv-python-headless==4.9.0.80  # Optional for image processing
 platformdirs==4.3.6
 psycopg2-binary==2.9.10
 pycparser==2.22
 PyJWT==2.10.1
 pyparsing==3.2.1
-pytesseract==0.3.10
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 python-gnupg==0.5.4
