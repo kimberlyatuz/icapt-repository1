@@ -75,9 +75,6 @@ from PIL import Image  #for images
 from .models import ExtractedImage
 from .forms import ExtractedImageForm
 
-
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-
 logger = logging.getLogger(__name__)
 
 # Create your views here.
