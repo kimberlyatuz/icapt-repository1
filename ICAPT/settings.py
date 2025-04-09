@@ -14,7 +14,7 @@ from pathlib import Path
 import os, inspect
 import dj_database_url
 import sys
-
+import pytesseract #for ocr detection
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -419,3 +419,9 @@ if not DEBUG:
     
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Default Linux path (works on Render), with fallback for local Windows
+TESSERACT_CMD = os.environ.get('TESSERACT_CMD', 
+    r'C:\Program Files\Tesseract-OCR\tesseract.exe' if os.name == 'nt' else '/usr/bin/tesseract'
+)
+pytesseract.pytesseract.tesseract_cmd = TESSERACT_CMD
