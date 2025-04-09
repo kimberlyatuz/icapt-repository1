@@ -201,15 +201,15 @@
             const themeToggle = document.getElementById('themeToggle');
             const themeIcon = document.getElementById('themeIcon');
             const body = document.body;
-            
+
             // Check for saved theme preference or use preferred color scheme
-            const savedTheme = localStorage.getItem('theme') || 
+            const savedTheme = localStorage.getItem('theme') ||
                               (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-            
+
             // Apply the saved theme
             body.classList.add(savedTheme);
             updateThemeIcon(savedTheme);
-            
+
             // Toggle theme on button click
             themeToggle.addEventListener('click', () => {
                 if (body.classList.contains('dark')) {
@@ -225,7 +225,7 @@
                 }
                 updateChartTheme();
             });
-            
+
             function updateThemeIcon(theme) {
                 if (theme === 'dark') {
                     themeIcon.classList.remove('fa-sun');
@@ -235,7 +235,7 @@
                     themeIcon.classList.add('fa-sun');
                 }
             }
-            
+
             // Initialize chart
             const ctx = document.getElementById('myLineChart').getContext('2d');
             let submissionChart = new Chart(ctx, {
@@ -259,10 +259,10 @@
                 },
                 options: getChartOptions()
             });
-            
+
             function getChartOptions() {
                 const isDark = body.classList.contains('dark');
-                
+
                 return {
                     responsive: true,
                     maintainAspectRatio: false,
@@ -322,7 +322,7 @@
                     }
                 };
             }
-            
+
             function updateChartTheme() {
                 submissionChart.destroy();
                 submissionChart = new Chart(ctx, {
