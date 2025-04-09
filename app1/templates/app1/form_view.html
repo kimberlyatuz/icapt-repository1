@@ -1,93 +1,255 @@
 {% extends 'app1/base.html' %}
 {% load crispy_forms_tags %}
+{% load static %}
 
 {% block content %}
-<div class="card border-primary">
-    <!-- Card Header with Title and Action Buttons -->
-    <div class="card-header bg-blue-500 text-white d-flex justify-content-between align-items-center">
-        <h1 class="card-title mb-4 fw-bold fs-1">{{ user_form_instance.title }}</h1>
-        <div>
-            {% include 'partials/action.html' %}
-        </div>
-    </div>
-
-    <!-- Card Body with Form -->
-    <div class="card-body bg-gray-200">
-        <!-- Referral Number Input -->
-        <div class="mb-4">
-            <label for="referral-number" class="form-label">Enter Referral Number:</label>
-            <input type="text" id="referral-number" class="form-control" placeholder="Enter referral number">
-            <button type="button" id="fetch-patient" class="btn btn-primary mt-2">Fetch Patient Details</button>
+<div class="container mt-4">
+    <!-- Main Card -->
+    <div class="card border-0 shadow-lg">
+        <!-- Card Header with Gradient Background -->
+        <div class="card-header bg-gradient-navy text-white d-flex justify-content-between align-items-center py-3">
+            <div>
+                <h1 class="card-title mb-0 fw-bold fs-2">
+                    <i class="fas fa-file-medical me-2"></i>{{ user_form_instance.title }}
+                </h1>
+                <p class="mb-0 text-white-50 small">Complete all required fields to submit the form</p>
+            </div>
+            <div>
+                {% include 'partials/action.html' %}
+            </div>
         </div>
 
-        <!-- Patient Details (Hidden by Default) -->
-        <div id="patient-details" class="mb-4" style="display: none;">
-            <h4>Patient Details</h4>
+        <!-- Card Body -->
+        <!-- Patient Lookup Section -->
+        <div class="search-section mb-4 p-4 bg-white rounded shadow-sm">
+            <h4 class="mb-3 text-navy">
+                <i class="fas fa-search me-2"></i>Patient Lookup
+            </h4>
             <div class="row g-3">
-                <div class="col-md-6">
-                    <label for="first-name" class="form-label">First Name:</label>
-                    <input type="text" id="first-name" name="first_name" class="form-control" readonly>
-                </div>
-                <div class="col-md-6">
-                    <label for="last-name" class="form-label">Last Name:</label>
-                    <input type="text" id="last-name" name="last_name" class="form-control" readonly>
-                </div>
-                <div class="col-md-6">
-                    <label for="age" class="form-label">Age:</label>
-                    <input type="number" id="age" name="age" class="form-control" readonly>
-                </div>
-                <div class="col-md-6">
-                    <label for="gender" class="form-label">Gender:</label>
-                    <input type="text" id="gender" name="gender" class="form-control" readonly>
-                </div>
-                <div class="col-md-6">
-                    <label for="marital-status" class="form-label">Marital Status:</label>
-                    <input type="text" id="marital-status" name="marital_status" class="form-control" readonly>
-                </div>
-                <div class="col-md-6">
-                    <label for="education-level" class="form-label">Education Level:</label>
-                    <input type="text" id="education-level" name="education_level" class="form-control" readonly>
-                </div>
-                <div class="col-md-6">
-                    <label for="employment-status" class="form-label">Employment Status:</label>
-                    <input type="text" id="employment-status" name="employment_status" class="form-control" readonly>
-                </div>
-                <div class="col-md-6">
-                    <label for="address" class="form-label">Address:</label>
-                    <input type="text" id="address" name="address" class="form-control" readonly>
-                </div>
-                <div class="col-md-6">
-                    <label for="phone-number" class="form-label">Phone Number:</label>
-                    <input type="text" id="phone-number" name="phone_number" class="form-control" readonly>
-                </div>
-                <div class="col-md-6">
-                    <label for="diagnosis" class="form-label">Diagnosis:</label>
-                    <input type="text" id="diagnosis" name="diagnosis" class="form-control" readonly>
+                <div class="col-md-8">
+                    <label for="patient-name" class="form-label fw-semibold">Patient Name</label>
+                    <input type="text" id="patient-name" class="form-control form-control-lg" placeholder="Enter patient name">
+                    <button type="button" id="fetch-patient" class="btn btn-navy mt-2">
+                        <i class="fas fa-search me-1"></i> Search
+                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- Dynamic Form Fields -->
-        <form method="post" novalidate id="dynamic-form">
-            {% csrf_token %}
-            <div class="row g-3">
-                {% for field in form %}
+        <!-- Patient Details Card (Initially Hidden) -->
+        <div id="patient-details" class="card mb-4 border-navy" style="display: none;">
+            <div class="card-header bg-navy-10 text-navy border-bottom-navy">
+                <h5 class="mb-0">
+                    <i class="fas fa-user-circle me-2"></i>Patient Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
                     <div class="col-md-6">
-                        {{ field|as_crispy_field }}
+                        <div class="form-floating">
+                            <input type="text" id="first-name" name="first_name" class="form-control" readonly>
+                            <label for="first-name">First Name</label>
+                        </div>
                     </div>
-                {% endfor %}
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" id="last-name" name="last_name" class="form-control" readonly>
+                            <label for="last-name">Last Name</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <input type="number" id="age" name="age" class="form-control" readonly>
+                            <label for="age">Age</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <input type="text" id="gender" name="gender" class="form-control" readonly>
+                            <label for="gender">Gender</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" id="marital-status" name="marital_status" class="form-control" readonly>
+                            <label for="marital-status">Marital Status</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" id="education-level" name="education_level" class="form-control" readonly>
+                            <label for="education-level">Education Level</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" id="employment-status" name="employment_status" class="form-control" readonly>
+                            <label for="employment-status">Employment Status</label>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="form-floating">
+                            <input type="text" id="address" name="address" class="form-control" readonly>
+                            <label for="address">Address</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input type="text" id="phone-number" name="phone_number" class="form-control" readonly>
+                            <label for="phone-number">Phone Number</label>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary mt-3">Submit</button>
-        </form>
+        </div>
 
-        <!-- Display form errors if any -->
+        <!-- Button to Open the Modal -->
+        <button type="button" class="btn btn-navy" data-bs-toggle="modal" data-bs-target="#patientModal">
+            <i class="fas fa-user-plus me-2"></i>Add Patient
+        </button>
+
+        <!-- Patient Demographics Modal -->
+        <div class="modal fade" id="patientModal" tabindex="-1" aria-labelledby="patientModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="patientModalLabel">Add Patient Demographics</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="patient-demographics-form" method="post">
+                            {% csrf_token %}
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" id="new-first-name" name="first_name" class="form-control" placeholder="First Name" required>
+                                        <label for="new-first-name">First Name</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" id="new-last-name" name="last_name" class="form-control" placeholder="Last Name" required>
+                                        <label for="new-last-name">Last Name</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-floating">
+                                        <input type="number" id="new-age" name="age" class="form-control" placeholder="Age" required>
+                                        <label for="new-age">Age</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-floating">
+                                        <select id="new-gender" name="gender" class="form-select" required>
+                                            <option value="">Select Gender</option>
+                                            <option value="male">Male</option>
+                                            <option value="female">Female</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                        <label for="new-gender">Gender</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <select id="new-marital-status" name="marital_status" class="form-select" required>
+                                            <option value="">Select Marital Status</option>
+                                            <option value="single">Single</option>
+                                            <option value="married">Married</option>
+                                            <option value="divorced">Divorced</option>
+                                            <option value="widowed">Widowed</option>
+                                        </select>
+                                        <label for="new-marital-status">Marital Status</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <select id="new-education-level" name="education_level" class="form-select" required>
+                                            <option value="">Select Education Level</option>
+                                            <option value="none">None</option>
+                                            <option value="primary">Primary</option>
+                                            <option value="secondary">Secondary</option>
+                                            <option value="tertiary">Tertiary</option>
+                                        </select>
+                                        <label for="new-education-level">Education Level</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <select id="new-employment-status" name="employment_status" class="form-select" required>
+                                            <option value="">Select Employment Status</option>
+                                            <option value="employed">Employed</option>
+                                            <option value="unemployed">Unemployed</option>
+                                            <option value="student">Student</option>
+                                            <option value="retired">Retired</option>
+                                        </select>
+                                        <label for="new-employment-status">Employment Status</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="form-floating">
+                                        <input type="text" id="new-address" name="address" class="form-control" placeholder="Address" required>
+                                        <label for="new-address">Address</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-floating">
+                                        <input type="text" id="new-phone-number" name="phone_number" class="form-control" placeholder="Phone Number" required>
+                                        <label for="new-phone-number">Phone Number</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-floating">
+                                        <input type="text" id="new-diagnosis" name="diagnosis" class="form-control" placeholder="Diagnosis" required>
+                                        <label for="new-diagnosis">Diagnosis</label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" id="submit-patient" class="btn btn-navy">
+                                        <i class="fas fa-save me-1"></i> Save Patient
+                                    </button>
+                                </div>
+                                <div class="col-12">
+                                    <div id="referral-number" class="mt-3" style="display: none;"></div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Submission Section -->
+        <div class="form-section mt-4">
+            <form method="post" novalidate id="dynamic-form" class="needs-validation">
+                {% csrf_token %}
+                <div class="card-body">
+                    <div class="row g-3">
+                        {% for field in form %}
+                            <div class="col-md-6 mb-3">
+                                {{ field|as_crispy_field }}
+                                {% if field.errors %}
+                                    <div class="text-danger">
+                                        {{ field.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-navy">Submit</button>
+            </form>
+        </div>
+
+        <!-- Error Display -->
         {% if form.errors %}
-            <div class="alert alert-danger mt-3">
-                <strong>Error:</strong> Please correct the following issues:
-                <ul>
+            <div class="alert alert-danger mt-4">
+                <h5 class="alert-heading">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Form Errors
+                </h5>
+                <ul class="mb-0">
                     {% for field in form %}
                         {% for error in field.errors %}
-                            <li>{{ field.label }}: {{ error }}</li>
+                            <li><strong>{{ field.label }}:</strong> {{ error }}</li>
                         {% endfor %}
                     {% endfor %}
                 </ul>
@@ -96,70 +258,184 @@
     </div>
 </div>
 
-<!-- JavaScript for Fetching Patient Details -->
-<script>
-document.getElementById('fetch-patient').addEventListener('click', function() {
-    const referralNumber = document.getElementById('referral-number').value;
-    if (referralNumber) {
-        fetch(`/api/patient-by-referral/${referralNumber}/`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    alert(data.error); // Show error message if patient not found
-                } else {
-                    // Display patient details
-                    document.getElementById('first-name').value = data.first_name;
-                    document.getElementById('last-name').value = data.last_name;
-                    document.getElementById('age').value = data.age;
-                    document.getElementById('gender').value = data.gender;
-                    document.getElementById('marital-status').value = data.marital_status;
-                    document.getElementById('education-level').value = data.education_level;
-                    document.getElementById('employment-status').value = data.employment_status;
-                    document.getElementById('address').value = data.address;
-                    document.getElementById('phone-number').value = data.phone_number;
-                    document.getElementById('diagnosis').value = data.diagnosis;
-
-                    // Show the patient details section
-                    document.getElementById('patient-details').style.display = 'block';
-                }
-            });
-    } else {
-        alert('Please enter a referral number.');
+<!-- Custom CSS -->
+<style>
+    :root {
+        --navy-primary: #1E3A8A; /* Dark Navy Blue */
+        --navy-dark: #16213E; /* Darker shade for hover effects */
+        --navy-light: #f0f4ff; /* Light background */
+        --navy-accent: #3b82f6; /* Accent color */
+        --navy-light-10: rgba(30, 58, 138, 0.1); /* Light transparent background */
     }
-});
-</script>
 
-<script>
-document.getElementById('fetch-patient').addEventListener('click', function() {
-    const searchQuery = document.getElementById('patient-search').value;
-    if (searchQuery) {
-        fetch(`/api/patient-search/?q=${searchQuery}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    alert(data.error); // Show error if no match is found
-                } else if (data.type === 'patient') {
-                    // Autofill patient details
-                    document.getElementById('first-name').value = data.first_name;
-                    document.getElementById('last-name').value = data.last_name;
-                    document.getElementById('gender').value = data.gender;
-
-                    // Show the patient details section
-                    document.getElementById('patient-details').style.display = 'block';
-                } else if (data.type === 'form') {
-                    // Autofill form details
-                    document.getElementById('form-title').value = data.title;
-                    document.getElementById('form-description').value = data.description;
-
-                    // Show the form details section
-                    document.getElementById('form-details').style.display = 'block';
-                }
-            });
-    } else {
-        alert('Please enter a search query.');
+    .bg-gradient-navy {
+        background: linear-gradient(135deg, var(--navy-dark), var(--navy-primary));
     }
+
+    .bg-navy-10 {
+        background-color: var(--navy-light-10);
+    }
+
+    .text-navy {
+        color: var(--navy-primary);
+    }
+
+    .border-navy {
+        border-color: var(--navy-primary) !important;
+    }
+
+    .border-bottom-navy {
+        border-bottom: 1px solid var(--navy-primary) !important;
+    }
+
+    .btn-navy {
+        background-color: var(--navy-primary);
+        border-color: var(--navy-primary);
+        color: white;
+    }
+
+    .btn-navy:hover {
+        background-color: var(--navy-dark);
+        border-color: var(--navy-dark);
+        color: white;
+    }
+
+    .bg-light-50 {
+        background-color: rgba(248, 249, 250, 0.8);
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--navy-light);
+        box-shadow: 0 0 0 0.25rem rgba(30, 58, 138, 0.25);
+    }
+
+    .search-section {
+        border-left: 4px solid var(--navy-primary);
+    }
+
+    .form-floating label {
+        color: #6c757d;
+    }
+
+    .form-floating > .form-control:not(:placeholder-shown) ~ label,
+    .form-floating > .form-control:focus ~ label {
+        color: var(--navy-primary);
+    }
+</style>
+
+<!-- JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Fetch Patient Details
+    document.getElementById('fetch-patient').addEventListener('click', function() {
+        const referralNumber = document.getElementById('patient-name').value.trim();
+
+        if (!referralNumber) {
+            Swal.fire({
+                title: 'Missing Information',
+                text: 'Please enter a referral number or patient name',
+                icon: 'warning',
+                confirmButtonColor: 'var(--navy-primary)'
+            });
+            return;
+        }
+
+        // Show loading state
+        const fetchBtn = document.getElementById('fetch-patient');
+        const originalText = fetchBtn.innerHTML;
+        fetchBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Searching...';
+        fetchBtn.disabled = true;
+
+        // Simulate API call (replace with actual fetch)
+        setTimeout(() => {
+            const mockData = {
+                first_name: "John",
+                last_name: "Doe",
+                age: 42,
+                gender: "Male",
+                marital_status: "Married",
+                education_level: "Bachelor's Degree",
+                employment_status: "Employed",
+                address: "123 Main St, Anytown, USA",
+                phone_number: "+1 (555) 123-4567",
+                diagnosis: "Hypertension (I10)"
+            };
+
+            // Populate form fields
+            document.getElementById('first-name').value = mockData.first_name;
+            document.getElementById('last-name').value = mockData.last_name;
+            document.getElementById('age').value = mockData.age;
+            document.getElementById('gender').value = mockData.gender;
+            document.getElementById('marital-status').value = mockData.marital_status;
+            document.getElementById('education-level').value = mockData.education_level;
+            document.getElementById('employment-status').value = mockData.employment_status;
+            document.getElementById('address').value = mockData.address;
+            document.getElementById('phone-number').value = mockData.phone_number;
+            document.getElementById('diagnosis').value = mockData.diagnosis;
+
+            // Show patient details
+            document.getElementById('patient-details').style.display = 'block';
+
+            // Reset button
+            fetchBtn.innerHTML = originalText;
+            fetchBtn.disabled = false;
+
+            // Smooth scroll to patient details
+            document.getElementById('patient-details').scrollIntoView({
+                behavior: 'smooth'
+            });
+
+        }, 1500);
+    });
+
+    // Patient Demographics Form Submission
+    document.getElementById('patient-demographics-form').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        const formData = new FormData(this); // Gather form data
+
+        fetch('{% url 'save_patient_demographics' %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest', // Needed for CSRF protection
+                'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token
+            },
+        })
+        .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.success); // Show success message
+            document.getElementById('referral-number').innerText = `Referral Number: ${data.referral_number}`;
+            document.getElementById('referral-number').style.display = 'block'; // Show referral number
+            this.reset(); // Reset the form
+
+            // Close the modal
+            var modal = bootstrap.Modal.getInstance(document.getElementById('patientModal'));
+            modal.hide();
+             // Autofill fields with patient demographics
+            const patientDemographics = PatientDemographics.objects.get(referral_number=data.referral_number);
+            document.getElementById('first-name').value = patientDemographics.first_name;
+            document.getElementById('last-name').value = patientDemographics.last_name;
+            document.getElementById('age').value = patientDemographics.age;
+            document.getElementById('gender').value = patientDemographics.gender;
+            document.getElementById('marital-status').value = patientDemographics.marital_status;
+            document.getElementById('education-level').value = patientDemographics.education_level;
+            document.getElementById('employment-status').value = patientDemographics.employment_status;
+            document.getElementById('address').value = patientDemographics.address;
+            document.getElementById('phone-number').value = patientDemographics.phone_number;
+        } else {
+            alert(data.error); // Show error message
+        }
+    })
+    .catch(error => {
+        alert(error.message);
+    });
 });
+
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 {% include 'partials/_footer.html' %}
 {% endblock %}
