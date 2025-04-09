@@ -51,7 +51,6 @@ pycparser==2.22
 PyJWT==2.10.1
 pyparsing==3.2.1
 pytesseract==0.3.10
-Pillow==10.1.0
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 python-gnupg==0.5.4
