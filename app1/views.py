@@ -1,9 +1,10 @@
 # for logging in and registering
+from django.contrib.auth.views import LoginView, LogoutView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView,PasswordResetCompleteView
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.views import LoginView
 from django.urls import reverse
+from django.urls import path
 # for editing entered data after submissions
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -16,9 +17,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django import forms
 
 from .decorators import unauthenticated_user, allowed_users, admin_only
-from .models import UserForm, UserFormField, FormSubmission, UserProfile, PatientDemographics
+from .models import UserForm, UserFormField, FormSubmission, UserProfile, PatientDemographics, AuditLog
 
-from .forms import UserFormCreationForm, UserFormFieldCreationForm, CreateUserForm, ImportForm
+from .forms import UserFormCreationForm, UserFormFieldCreationForm, ImportForm, CreateUserForm
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -64,12 +65,21 @@ from dateutil import parser
 #for audit trails
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 
 from django.core.exceptions import PermissionDenied
 from django.views.decorators.http import require_POST
+#for imports
+import pytesseract   #extract text from the images
+from PIL import Image  #for images
+from .models import ExtractedImage
+from .forms import ExtractedImageForm
 
+
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 logger = logging.getLogger(__name__)
+
 # Create your views here.
 def loginpage(request):
     if request.method == 'POST':
@@ -94,6 +104,17 @@ def loginpage(request):
     context = {'next': request.GET.get('next', '')}
     return render(request, 'accounts/login.html', context)
 
+def PasswordResetView(request):
+    return render(request, 'accounts/password_reset.html')
+
+def PasswordResetDoneView(request):
+    return render(request, 'accounts/reset_password_done.html')
+
+def PasswordResetConfirmView(request):
+    return render(request, 'accounts/password_confirm.html')
+
+def PasswordResetCompleteView(request):
+    return render(request, 'accounts/password_reset_complete.html')
 
 def logoutuser(request):
     logout(request)
@@ -119,7 +140,6 @@ def register(request):
 def unauthorized(request):
     return HttpResponseForbidden("You don't have access to this page.")
 
-
 @login_required(login_url='login')
 # @user_passes_test(lambda u: u.groups.filter(name='staff').exists(), login_url='login')
 def index(request):
@@ -144,6 +164,10 @@ def index(request):
     return render(request, 'app1/home.html', context)
 
 @login_required(login_url='login')
+def forgot_password(request):
+    return render(request, 'accounts/forgot_password.html')
+
+@login_required(login_url='login')
 def add_user(request):
     return render(request, 'app1/admin_add_user.html')
 
@@ -154,12 +178,6 @@ def enter_data(request):
 @login_required(login_url='login')
 def predictive_analytics(request):
     return render(request, 'app1/predictive_analytics.html')
-
-def reset_password(request):
-    return render(request, 'app1/reset_password.html')
-
-def forgot_password(request):
-    return render(request, 'app1/forgot_password.html')
 
 @login_required(login_url='login')
 def ReviewRecords(request, submission_id):
@@ -323,7 +341,6 @@ def view_user_form(request, form_id):
 
 # View to list all UserForms created by the user (optional)
 @login_required(login_url='login')
-@allowed_users(allowed_roles=['staff', 'admin'])
 def user_forms_list(request):
     user_forms = UserForm.objects.all()
 
@@ -362,19 +379,20 @@ def form_view(request, form_id):
     class DynamicUserForm(forms.Form):
         pass
 
+    # Dynamically add fields based on the UserFormField model
     for field in fields:
         field_type = field.field_type
         if field_type == 'text':
             DynamicUserForm.base_fields[field.label] = forms.CharField(
                 required=field.required,
                 label=field.label,
-                widget=forms.TextInput(attrs={'placeholder': field.placeholder})
+                widget=forms.TextInput(attrs={'placeholder': field.placeholder}),
             )
         elif field_type == 'textarea':
             DynamicUserForm.base_fields[field.label] = forms.CharField(
                 required=field.required,
                 label=field.label,
-                widget=forms.Textarea(attrs={'placeholder': field.placeholder})
+                widget=forms.Textarea(attrs={'placeholder': field.placeholder}),
             )
         elif field_type == 'select':
             choices = [(option, option) for option in field.get_options()]
@@ -382,12 +400,12 @@ def form_view(request, form_id):
                 required=field.required,
                 label=field.label,
                 choices=choices,
-                widget=forms.Select(attrs={'placeholder': field.placeholder})
+                widget=forms.Select(attrs={'placeholder': field.placeholder}),
             )
         elif field_type == 'checkbox':
             DynamicUserForm.base_fields[field.label] = forms.BooleanField(
                 required=field.required,
-                label=field.label
+                label=field.label,
             )
         elif field_type == 'radio':
             choices = [(option, option) for option in field.get_options()]
@@ -395,38 +413,80 @@ def form_view(request, form_id):
                 required=field.required,
                 label=field.label,
                 widget=forms.RadioSelect,
-                choices=choices
+                choices=choices,
             )
         elif field_type == 'email':
             DynamicUserForm.base_fields[field.label] = forms.EmailField(
                 required=field.required,
                 label=field.label,
-                widget=forms.EmailInput(attrs={'placeholder': field.placeholder})
+                widget=forms.EmailInput(attrs={'placeholder': field.placeholder}),
             )
         elif field_type == 'number':
             DynamicUserForm.base_fields[field.label] = forms.IntegerField(
                 required=field.required,
                 label=field.label,
-                widget=forms.NumberInput(attrs={'placeholder': field.placeholder})
+                widget=forms.NumberInput(attrs={'placeholder': field.placeholder}),
             )
         elif field_type == 'date':
             DynamicUserForm.base_fields[field.label] = forms.DateField(
                 required=field.required,
                 label=field.label,
-                widget=forms.DateInput(attrs={'type': 'date', 'placeholder': field.placeholder})
+                widget=forms.DateInput(attrs={'type': 'date', 'placeholder': field.placeholder}),
             )
+
+    # Add the clean method for custom validation
+    def clean(self):
+        cleaned_data = super(DynamicUserForm, self).clean()
+        for field in self.base_fields:
+            value = cleaned_data.get(field)
+            field_instance = next(f for f in fields if f.label == field)
+
+            # Custom validation based on field type
+            if field_instance.required and not value:
+                self.add_error(field, f"{field} is required.")
+
+            if field_instance.field_type == 'email' and value:
+                try:
+                    forms.EmailField().clean(value)
+                except ValidationError:
+                    self.add_error(field, "Enter a valid email address.")
+
+            if field_instance.field_type == 'number':
+                if value is not None:
+                    try:
+                        # Validate that the value is an integer
+                        int(value)
+                    except (ValueError, TypeError):
+                        self.add_error(field, "This field requires a valid number.")
+
+            # Additional check for text fields to ensure they don't contain numbers
+            if field_instance.field_type == 'text' and value:
+                if any(char.isdigit() for char in value):
+                    self.add_error(field, "Text fields cannot contain numbers.")
+
+        return cleaned_data
+
+    # Bind the clean method to the DynamicUserForm class
+    DynamicUserForm.clean = clean
 
     if request.method == 'POST':
         form = DynamicUserForm(request.POST)
-        if form.is_valid():
-            # Check for required fields
-            for field in fields:
-                if field.required and not form.cleaned_data.get(field.label):
-                    messages.error(request, f"{field.label} is required.")
-                    return render(request, 'app1/form_view.html',
-                                  {'form': form, 'user_form_instance': user_form_instance})
+        patient_demographics = PatientDemographics.objects.filter(
+            referral_number=request.POST.get('referral_number')).first()
+        if patient_demographics:
+            # Autofill fields with patient demographics
+            request.POST['first_name'] = patient_demographics.first_name
+            request.POST['last_name'] = patient_demographics.last_name
+            request.POST['age'] = patient_demographics.age
+            request.POST['gender'] = patient_demographics.gender
+            request.POST['marital_status'] = patient_demographics.marital_status
+            request.POST['education_level'] = patient_demographics.education_level
+            request.POST['employment_status'] = patient_demographics.employment_status
+            request.POST['address'] = patient_demographics.address
+            request.POST['phone_number'] = patient_demographics.phone_number
 
-            # Handle the valid form data as needed
+        if form.is_valid():
+            # Handle valid form data
             data = {field.label: form.cleaned_data[field.label] for field in fields}
 
             # Convert date objects to string
@@ -438,6 +498,11 @@ def form_view(request, form_id):
             FormSubmission.objects.create(user=user, user_form=user_form_instance, data=data)
 
             return redirect('form_view', form_id=user_form_instance.id)
+        else:
+            for field in form:
+                for error in field.errors:
+                    messages.error(request, f"{field.label}: {error}")  # Display errors to user
+
     else:
         form = DynamicUserForm()  # Initialize the form for GET requests
 
@@ -450,9 +515,7 @@ def form_view(request, form_id):
         'user_form_instance': user_form_instance,
     })
 
-
 @login_required(login_url='login')
-@allowed_users(allowed_roles=['admin'])
 def delete_user_form(request, form_id):
     form = get_object_or_404(UserForm, id=form_id)
     form.delete()
@@ -490,6 +553,42 @@ def list_form_submissions(request):
 @login_required(login_url='login')
 def form_submission_success(request):
     return render(request, 'app1/form_submission_success.html')
+
+
+@csrf_exempt
+@login_required
+def process_document(request):
+    if request.method == 'POST' and request.FILES.get('document'):
+        try:
+            image_file = request.FILES['document']
+
+            # Process the image with OCR
+            img = Image.open(image_file)
+            extracted_text = pytesseract.image_to_string(img)
+
+            # Parse the extracted text (simplified example)
+            parsed_data = {}
+            for line in extracted_text.split('\n'):
+                if ':' in line:
+                    key, value = line.split(':', 1)
+                    parsed_data[key.strip().lower()] = value.strip()
+
+            return JsonResponse({
+                'success': True,
+                'extracted': parsed_data,
+                'raw_text': extracted_text
+            })
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
+
+    return JsonResponse({
+        'success': False,
+        'error': 'Invalid request'
+    }, status=400)
+
 
 # for admin to review the submissions from user
 @login_required(login_url='login')
@@ -905,6 +1004,23 @@ def import_data(request):
     # Handle GET requests
     return render(request, 'app1/import.html', {'user_forms': user_forms})
 
+def upload_and_extract(request):
+    if request.method == "POST":
+        form = ExtractedImageForm(request.POST, request.FILES)
+        if form.is_valid():
+            uploaded_image = form.save(commit=False)
+            image = Image.open(uploaded_image.image)
+            uploaded_image.extracted_text = pytesseract.image_to_string(image)
+            uploaded_image.save()
+            return redirect('result', pk=uploaded_image.pk)
+    else:
+        form = ExtractedImageForm()
+    return render(request, 'imageprocessor/upload.html', {'form': form})
+
+def result_view(request, pk):
+    image_entry = ExtractedImage.objects.get(pk=pk)
+    return render(request, 'imageprocessor/result.html', {'image_entry': image_entry})
+
 @login_required(login_url='login')
 def dashboard(request):
     # Get the logged-in user's profile
@@ -1054,7 +1170,6 @@ METABASE_SITE_URL = "http://localhost:5003"
 METABASE_SECRET_KEY = "abef27c86994e5a767f1b3c44b7081d52c6865c620d94e24c593ec806a444082"
 
 @login_required(login_url='login')
-@allowed_users(allowed_roles=['admin'])
 def ME_Dashboard(request):
     # Payload for the JWT
     payload = {
@@ -1073,24 +1188,68 @@ def ME_Dashboard(request):
     # Render the template with the iframe URL
     return render(request, 'app1/MEdashboard.html', {'iframe_url': iframe_url})
 
-def get_patient_by_referral(request, referral_number):
-    try:
-        patient = PatientDemographics.objects.get(referral_number=referral_number)
-        data = {
-            'first_name': patient.first_name,
-            'last_name': patient.last_name,
-            'age': patient.age,
-            'gender': patient.gender,
-            'marital_status': patient.marital_status,
-            'education_level': patient.education_level,
-            'employment_status': patient.employment_status,
-            'address': patient.address,
-            'phone_number': patient.phone_number,
-            'diagnosis': patient.diagnosis,
-        }
-        return JsonResponse(data)
-    except PatientDemographics.DoesNotExist:
-        return JsonResponse({'error': 'Patient not found.'}, status=404)
+@csrf_exempt
+def add_patient(request):
+    if request.method == 'POST':
+        try:
+            # Retrieve data from the request
+            first_name = request.POST.get('first_name')
+            last_name = request.POST.get('last_name')
+            age = request.POST.get('age')
+            gender = request.POST.get('gender')
+            marital_status = request.POST.get('marital_status')
+            education_level = request.POST.get('education_level')
+            employment_status = request.POST.get('employment_status')
+            address = request.POST.get('address')
+            phone_number = request.POST.get('phone_number')
+            diagnosis = request.POST.get('diagnosis')
+            updated_by = request.user  # If user is logged in
+
+            # Create a new PatientDemographics instance
+            patient = PatientDemographics(
+                first_name=first_name,
+                last_name=last_name,
+                age=age,
+                gender=gender,
+                marital_status=marital_status,
+                education_level=education_level,
+                employment_status=employment_status,
+                address=address,
+                phone_number=phone_number,
+                diagnosis=diagnosis,
+                updated_by=updated_by
+            )
+            patient.save()  # Save the instance to the database
+
+            return JsonResponse({'success': 'Patient added successfully!', 'referral_number': str(patient.referral_number)})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def fetch_patient(request):
+    if request.method == 'GET':
+        patient_name = request.GET.get('name')
+        try:
+            patient = PatientDemographics.objects.get(first_name__icontains=patient_name)  # Adjust as needed
+            data = {
+                'first_name': patient.first_name,
+                'last_name': patient.last_name,
+                'age': patient.age,
+                'gender': patient.gender,
+                'marital_status': patient.marital_status,
+                'education_level': patient.education_level,
+                'employment_status': patient.employment_status,
+                'address': patient.address,
+                'phone_number': patient.phone_number,
+                'diagnosis':patient.diagnosis,
+            }
+            return JsonResponse(data)
+        except PatientDemographics.DoesNotExist:
+            return JsonResponse({'error': 'Patient not found'}, status=404)
+
+        except Exception as e:
+            logger.error(f"Error adding patient: {str(e)}")
+            return JsonResponse({'error': str(e)}, status=400)
 
 @receiver(post_save, sender=PatientDemographics)
 def log_patient_update(sender, instance, **kwargs):
@@ -1119,3 +1278,23 @@ def patient_search(request):
         else:
             return JsonResponse({'error': 'Patient not found.'}, status=404)
     return JsonResponse({'error': 'No search query provided.'}, status=400)
+
+def save_patient_demographics(request):
+    if request.method == 'POST':
+        form_data = request.POST
+        patient_demographics = PatientDemographics(
+            first_name=form_data['first_name'],
+            last_name=form_data['last_name'],
+            age=form_data['age'],
+            gender=form_data['gender'],
+            marital_status=form_data['marital_status'],
+            education_level=form_data['education_level'],
+            employment_status=form_data['employment_status'],
+            address=form_data['address'],
+            phone_number=form_data['phone_number'],
+            diagnosis=form_data['diagnosis']
+        )
+        patient_demographics.save()
+        return JsonResponse({'success': 'Patient demographics saved successfully'})
+    else:
+        return JsonResponse({'error': 'Invalid request method'})
